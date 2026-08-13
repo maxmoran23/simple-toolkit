@@ -441,6 +441,19 @@ Each release records:
 
 Each material output records the toolkit version or source commit used. A file modified outside a release must be identifiable as local and unverified.
 
+## Initial release record
+
+| Field | `v1.0.0` record |
+|---|---|
+| Version and date | `v1.0.0`; 2026-08-13 |
+| Source commits reviewed | `analyst-toolkit` at `9a34133881b6497b9cbdc368f9d3b7500c07141b`; `Claude-Agent-Fleet` at `e7df707b2f3ade467bb19fa00cf3dbf936448c26` |
+| Files changed | Initial 14-file Markdown package, MIT license and third-party notices, `.gitignore`, validator, and GitHub Actions validation workflow |
+| Behavior and control changes | Establishes the authority, evidence, completeness, human-approval, output, orchestration, security, and release-control baseline described by this package |
+| Migration required | None for a new installation; users migrating from the source libraries should use the file-selection matrix and repository-migration procedure below |
+| Tests and review completed | Deterministic inventory, privacy, terminology, link, registry, fence, and CI checks; JSON/YAML parsing; source-tree cleanliness; independent semantic cross-file audit and corrective review |
+| Known limitations | Markdown is an instruction system, not a runtime; host and connector capabilities remain environment-dependent; external endpoints and regulatory content require dated maintenance; no deployment-specific calibration or legal conclusion is included |
+| Rollback release | None, because this is the first release; stop using the package and retain the tagged release as the audit copy if adoption is reversed |
+
 ## Change-log discipline
 
 Every change-log entry should answer:
@@ -596,13 +609,12 @@ Do not combine unrelated metrics into a single health score that masks a hard fa
 
 ## Source provenance record
 
-This consolidation audited three public repositories at immutable commits on 2026-08-13. Two supplied durable methods; the public profile supplied orientation only.
+This consolidation audited two public method repositories at immutable commits on 2026-08-13. Unrelated repositories were excluded from content and are not identified here because they supplied no reusable method.
 
 | Source | Audited snapshot | Disposition and contribution |
 |---|---|---|
-| [analyst-toolkit](https://github.com/maxmoran23/analyst-toolkit) | [`9a34133881b6497b9cbdc368f9d3b7500c07141b`](https://github.com/maxmoran23/analyst-toolkit/tree/9a34133881b6497b9cbdc368f9d3b7500c07141b); 664 tracked files, including 334 Markdown files and 67,440 Markdown lines | `ABSORB` durable method: audit-defensible methodology, source hierarchy, prompt portability, communications extraction, analytical frameworks, output standards, deterministic evidence, validation, and deployment boundaries. |
-| [Claude-Agent-Fleet](https://github.com/maxmoran23/Claude-Agent-Fleet) | [`e7df707b2f3ade467bb19fa00cf3dbf936448c26`](https://github.com/maxmoran23/Claude-Agent-Fleet/tree/e7df707b2f3ade467bb19fa00cf3dbf936448c26); 112 tracked files, including 65 Markdown files and 11,252 Markdown lines | `ABSORB` durable method: stateful orchestration, checkpoints, authority/projection separation, fallback chains, idempotency outbox, budget controls, liveness, evaluation harnesses, repair classification, and propose-and-gate change control. |
-| [Public profile repository](https://github.com/maxmoran23/maxmoran23) | [`69b31c61e2f5759b5bfccf3e1c8d6361fdaea4e9`](https://github.com/maxmoran23/maxmoran23/tree/69b31c61e2f5759b5bfccf3e1c8d6361fdaea4e9); one tracked Markdown file | `EXCLUDE` from toolkit content: inspected as a public orientation and project index, but its material is biographical rather than a reusable analytical or orchestration method. |
+| [analyst-toolkit](https://github.com/maxmoran23/analyst-toolkit) | [`9a34133881b6497b9cbdc368f9d3b7500c07141b`](https://github.com/maxmoran23/analyst-toolkit/tree/9a34133881b6497b9cbdc368f9d3b7500c07141b); 664 tracked files, including 335 Markdown files and 67,491 Markdown lines | `ABSORB` durable method: audit-defensible methodology, source hierarchy, prompt portability, communications extraction, analytical frameworks, output standards, deterministic evidence, validation, and deployment boundaries. |
+| [Claude-Agent-Fleet](https://github.com/maxmoran23/Claude-Agent-Fleet) | [`e7df707b2f3ade467bb19fa00cf3dbf936448c26`](https://github.com/maxmoran23/Claude-Agent-Fleet/tree/e7df707b2f3ade467bb19fa00cf3dbf936448c26); 112 tracked files, including 68 Markdown files and 11,307 Markdown lines | `ABSORB` durable method: stateful orchestration, checkpoints, authority/projection separation, fallback chains, idempotency outbox, budget controls, liveness, evaluation harnesses, repair classification, and propose-and-gate change control. |
 
 The two method source repositories use the MIT License at the audited commits. Preserve the applicable copyright and permission notices in the public repository. This map documents methodological lineage; it does not imply that source implementations were copied, installed, or deployed. No private repository or local desktop material was imported: the public sources were sufficient for the requested generic system, and public-release data minimization favored exclusion.
 
@@ -658,12 +670,6 @@ The source repositories remain independent and unchanged. The simplified toolkit
 | `showcase/` | `REFERENCE` | [Output Templates](07-output-templates.md), [Use-Case Recipes](10-use-case-recipes.md) | Preserve useful layout and workflow lessons only; exclude generated visual assets and specialized demonstrations. |
 | `tests/` | `ABSORB` scenarios, `EXCLUDE` source-specific test code | [Quality Assurance](09-quality-assurance.md), this file | Carry forward tests for state, outbox, evaluation, configuration, and duplicate processing as acceptance cases for any future implementation. |
 | Environment samples, dependencies, and runtime packaging | `EXCLUDE` | This file | Avoid credential shapes, vendor-specific model defaults, and dependencies that imply the lightweight toolkit is already runnable. |
-
-### Public profile repository
-
-| Source area | Disposition | Simplified destination | Consolidation decision |
-|---|---|---|---|
-| Profile `README.md` | `EXCLUDE` from content; retain this audit record | This file | The page is a public biographical and project-orientation index. It informed repository discovery but adds no durable analytical, evidence, output, orchestration, security, or deployment method. Exclusion prevents personal context from entering a generic institutional toolkit. |
 
 ### Intentionally excluded classes
 

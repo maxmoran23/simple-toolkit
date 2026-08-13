@@ -5,6 +5,8 @@ It consolidates research, OSINT, communications review, financial-crime intellig
 data quality, automation, quality assurance, and professional reporting into a small
 set of large, reusable Markdown modules.
 
+Current release: `v1.0.0` — 2026-08-13.
+
 The package is designed for constrained work environments where a user can attach a
 limited number of reference files to an approved assistant. It is not a monitoring
 service, a screening system, a legal opinion, or an authorization to take action.
@@ -177,4 +179,4 @@ made solely from an HTTP status check.
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+MIT. See [`LICENSE`](LICENSE). Upstream notices are preserved in [`NOTICE`](NOTICE).

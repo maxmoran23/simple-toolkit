@@ -608,7 +608,7 @@ If the external action succeeds but authoritative state cannot be persisted, mar
   "trigger": "[manual, schedule, event]",
   "input_counts": {},
   "coverage_counts": {},
-  "source_health": [{"source": "[name]", "tier": "PRIMARY", "status": "OK"}],
+  "source_health": [{"source": "[name]", "source_role": "PRIMARY", "evidence_tier": "T1", "status": "OK"}],
   "fallback_count": 0,
   "retry_count": 0,
   "quality_self_rating": "HIGH|MODERATE|LOW",

@@ -667,10 +667,13 @@ Report counts by source, mailbox/workspace, folder/channel, record type, day or 
 
 Use one of:
 
-- `COMPLETE_WITHIN_STATED_SCOPE` — all in-scope containers and objects reconcile; limitations remain visible.
-- `COMPLETE_WITH_DOCUMENTED_EXCLUSIONS` — reconciliation passes after approved exclusions.
-- `PARTIAL_WITH_IDENTIFIED_GAPS` — useful output exists, but one or more gaps remain.
-- `NOT_RECONCILED` — control totals fail or cannot be obtained; no completeness claim.
+- `COMPLETE FOR DECLARED SCOPE` — all in-scope material reconciles and required checks pass.
+- `COMPLETE WITH DECLARED EXCEPTIONS` — reconciliation balances, but listed inaccessible, unparsed, or deferred items remain.
+- `PARTIAL` — supplied or expected coverage cannot be reconciled; do not imply completeness.
+
+These are the canonical completion forms in module `00`. If an implementation needs
+machine tokens, map them one-to-one to these display values. `NOT_RECONCILED` may be a
+reason or workflow status beneath `PARTIAL`; it is not a fourth completeness conclusion.
 
 “Complete” never means all communications that exist everywhere. It means complete within the exact authorized scope and source capabilities recorded in the manifest.
 
@@ -841,7 +844,7 @@ Raw messages and attachment content should remain in the approved evidence store
 # Communications Intelligence Run — <scope> — <cutoff>
 
 ## Disposition
-<COMPLETE_WITHIN_STATED_SCOPE | COMPLETE_WITH_DOCUMENTED_EXCLUSIONS | PARTIAL_WITH_IDENTIFIED_GAPS | NOT_RECONCILED>
+<COMPLETE FOR DECLARED SCOPE | COMPLETE WITH DECLARED EXCEPTIONS | PARTIAL>
 
 ## Scope and Access
 <sources, containers, period, timezone, content depth, exclusions, authorization reference>
@@ -981,7 +984,7 @@ HARD RULES
 9. Extract entities, issues, decisions, actions, deadlines, escalation indicators, commitments, blockers, and response obligations only when the source supports them. Every material item requires an evidence span, method, confidence, and review status.
 10. Never infer an owner, decision, closure, deadline, or response from silence. Label “appears unanswered within scope” as an inference.
 11. Inventory every attachment and record retrieved, parsed, unreadable, encrypted, unsupported, excluded, or missing status. Do not claim analysis from a filename.
-12. Reconcile source receipts, normalized records, unique messages, duplicates, versions, quarantine, attachments, and tracker lineage. If totals do not tie, mark the run NOT_RECONCILED.
+12. Reconcile source receipts, normalized records, unique messages, duplicates, versions, quarantine, attachments, and tracker lineage. If totals do not tie, set the completeness conclusion to `PARTIAL` and record `NOT_RECONCILED` as the reason/status.
 13. Maintain a gap ledger with population and downstream impact. Stale or fallback data must be labeled and cannot support a fresh conclusion.
 14. For refreshes, use the last successful watermark plus an overlap window. Preserve history and explicit supersession.
 15. Draft only when a supported response obligation or human request exists. Do not invent recipients, facts, commitments, dates, attachments, approvals, or delivery.

@@ -29,7 +29,15 @@ EXPECTED_MARKDOWN = {
     "toolkit/11-deployment-security-maintenance.md",
 }
 
-REQUIRED_ROOT_FILES = {"README.md", "AGENTS.md", "LICENSE", ".gitignore"}
+REQUIRED_FILES = {
+    "README.md",
+    "AGENTS.md",
+    "LICENSE",
+    "NOTICE",
+    ".gitignore",
+    "validate.py",
+    ".github/workflows/validate.yml",
+}
 MODULE_LINKS = [f"toolkit/{number:02d}-" for number in range(12)]
 SOURCE_ROW = re.compile(r"^\| (?P<id>\d{2}\.\d{3}) \| (?P<tier>T1|T2|T3|TX) \|", re.MULTILINE)
 MARKDOWN_LINK = re.compile(r"!?\[[^\]\n]*\]\((?P<target>[^)\n]+)\)")
@@ -70,9 +78,9 @@ def check_inventory(files: dict[str, Path], errors: list[str]) -> None:
         fail(errors, f"missing Markdown files: {', '.join(missing)}")
     if extra:
         fail(errors, f"unexpected Markdown files: {', '.join(extra)}")
-    for name in sorted(REQUIRED_ROOT_FILES):
+    for name in sorted(REQUIRED_FILES):
         if not (ROOT / name).is_file():
-            fail(errors, f"missing required root file: {name}")
+            fail(errors, f"missing required file: {name}")
 
 
 def check_text(files: dict[str, Path], errors: list[str]) -> tuple[int, int]:
@@ -201,6 +209,43 @@ def check_terminology(files: dict[str, Path], errors: list[str]) -> None:
                 fail(errors, f"{rel}:{line}: {label}")
 
 
+def check_release_controls(files: dict[str, Path], errors: list[str]) -> None:
+    readme = files.get("README.md")
+    deployment = files.get("toolkit/11-deployment-security-maintenance.md")
+    agents = files.get("AGENTS.md")
+    workflow = ROOT / ".github/workflows/validate.yml"
+
+    if readme and "Current release: `v1.0.0`" not in readme.read_text(encoding="utf-8"):
+        fail(errors, "README.md: missing current release record")
+    if deployment:
+        text = deployment.read_text(encoding="utf-8")
+        if "## Initial release record" not in text or "| Rollback release |" not in text:
+            fail(errors, "toolkit/11-deployment-security-maintenance.md: incomplete initial release record")
+        if "github.com/maxmoran23/maxmoran23" in text:
+            fail(errors, "toolkit/11-deployment-security-maintenance.md: unrelated profile repository disclosed")
+    if agents:
+        equation = (
+            "items_received_or_identified\n"
+            "= processed\n"
+            "+ duplicates\n"
+            "+ excluded_by_rule\n"
+            "+ unparsed\n"
+            "+ inaccessible\n"
+            "+ deferred"
+        )
+        if equation not in agents.read_text(encoding="utf-8"):
+            fail(errors, "AGENTS.md: canonical completeness equation missing")
+
+    if workflow.is_file():
+        text = workflow.read_text(encoding="utf-8")
+        uses = re.findall(r"(?m)^\s*-\s+uses:\s+[^@\s]+@([^\s#]+)", text)
+        if not uses:
+            fail(errors, ".github/workflows/validate.yml: no external actions found")
+        for ref in uses:
+            if not re.fullmatch(r"[0-9a-f]{40}", ref):
+                fail(errors, f".github/workflows/validate.yml: action ref is not pinned to a commit: {ref}")
+
+
 def main() -> int:
     errors: list[str] = []
     files = markdown_files()
@@ -210,6 +255,7 @@ def main() -> int:
     check_readme(files, errors)
     sources, tiers = check_registry(files, errors)
     check_terminology(files, errors)
+    check_release_controls(files, errors)
 
     if errors:
         print(f"FAIL: {len(errors)} validation error(s)")
@@ -223,7 +269,7 @@ def main() -> int:
     print(f"- Internal / external links: {internal:,} / {external:,}")
     print(f"- OSINT source entries: {sources:,}")
     print("- Source tiers: " + ", ".join(f"{tier}={count}" for tier, count in tiers.items()))
-    print("- Privacy, unfinished-marker, emoji, HTTPS, fence, inventory, and terminology checks: passed")
+    print("- Privacy, unfinished-marker, emoji, HTTPS, fence, inventory, terminology, and release-control checks: passed")
     return 0
 
 

@@ -109,7 +109,7 @@ No recipe authorizes access or action. The brief must state both.
 | Minimum inputs | mailbox/folders, access authority, period, expected count or control report, inclusion/exclusion rules, time zone, issue taxonomy, owners/SLAs, output |
 | Core steps | manifest; folder and paging inventory; immutable message/attachment capture; canonical ID; thread reconstruction; quoted/signature removal without deleting raw text; duplicate/version logic; entity/issue/action/decision/deadline extraction with evidence spans; reconciliation; review queue; digest/tracker |
 | Outputs | corpus manifest, message/thread index, issue/action/decision registers, attachment inventory, exception/failure log, executive digest, coverage and QA report |
-| Gates | `expected = processed + excluded + failed`; every processed item has one disposition; uncertain extraction remains reviewable; external drafts not sent without approval |
+| Gates | Canonical reconciliation from module `00`: `items received or identified = processed + duplicates + excluded by rule + unparsed + inaccessible + deferred`, with mutually exclusive terminal buckets; every processed item has one disposition; uncertain extraction remains reviewable; external drafts not sent without approval |
 
 Use module `03`'s canonical schemas. Do not summarize only the inbox landing page or a
 search result and call it a mailbox review.
@@ -341,7 +341,7 @@ search result and call it a mailbox review.
 | Objective | Run a controlled delta-based workflow repeatedly without duplicate actions or silent degradation |
 | Load | `00`, relevant domain modules, `06`, `07`, `08`, `09`, `11` |
 | Minimum inputs | schedule/trigger, source registry, state authority, last-good checkpoint, output destinations, budgets, SLAs, owners, fallback and approval rules |
-| Core steps | acquire lock; load state; verify source health; collect delta with overlap; normalize/dedupe; reconcile; analyze; compare prior; draft output; self-check; stage writes in outbox; human gate; publish; confirm; persist state; health report; release lock |
+| Core steps | acquire lock; load state; verify source health; collect delta with overlap; normalize/dedupe; reconcile; analyze; compare prior; produce an immutable draft and exact action preview; validate and self-check; obtain specific human approval; persist the approval reference; claim the approved deterministic action key in the outbox; publish once; verify and confirm the destination receipt; confirm the outbox action; persist authoritative state; health report; release lock |
 | Outputs | current report/tracker, delta log, source-health and coverage metrics, outbox/action receipts, state/checkpoint, exception/incident log |
 | Gates | idempotency and canonical IDs; state advances only after confirmed outcome; fallbacks visible; no fallback for compliance-critical decisions/writes; proposed self-repair gated; deadman/liveness monitor independent |
 

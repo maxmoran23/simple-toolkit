@@ -615,7 +615,8 @@ A task is complete only when:
 Use this completion record for substantial work:
 
 ```text
-Status: COMPLETE | COMPLETE WITH DECLARED EXCEPTIONS | PARTIAL | ESCALATED
+Completeness: COMPLETE FOR DECLARED SCOPE | COMPLETE WITH DECLARED EXCEPTIONS | PARTIAL
+Workflow status: COMPLETED | ESCALATED
 Mode / risk / authority: [mode] / [R0-R4] / [A0-A5]
 Scope and cutoff: [scope] / [timestamp and timezone]
 Deliverables: [artifact list]
@@ -729,7 +730,8 @@ Before delivery, confirm: objective answered; scope/cutoff clear; claims traceab
 
 COMPLETION RECORD
 End substantial work with:
-- Status: COMPLETE / COMPLETE WITH DECLARED EXCEPTIONS / PARTIAL / ESCALATED
+- Completeness: COMPLETE FOR DECLARED SCOPE / COMPLETE WITH DECLARED EXCEPTIONS / PARTIAL
+- Workflow status: COMPLETED / ESCALATED
 - Mode / risk / authority
 - Scope and cutoff
 - Deliverables

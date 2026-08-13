@@ -187,12 +187,19 @@ exists. Record both the source's own date and the retrieval date.
 For population-based work, report:
 
 ```text
-expected = processed + excluded_with_reason + failed_or_unavailable
-processed = unique_outputs + duplicates_or_superseded
+items_received_or_identified
+= processed
++ duplicates
++ excluded_by_rule
++ unparsed
++ inaccessible
++ deferred
 ```
 
-If `expected` is unknown, do not call the review complete. State the accessible scope,
-the method used to estimate coverage, and the residual risk.
+These are mutually exclusive terminal buckets. A duplicate or superseded version is not
+also counted as processed. If the expected population is unknown, do not call the review
+complete. State the accessible scope, the method used to estimate coverage, and the
+residual risk.
 
 ## External action gate
 

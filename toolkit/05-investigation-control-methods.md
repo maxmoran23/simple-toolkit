@@ -655,15 +655,19 @@ Review the work, not just the final paragraph.
 
 ### 15.2 Error types
 
-- **critical:** wrong subject, missed plausible true match, unauthorized action, material
-  evidence omitted, incorrect regulated decision, or unreconciled material population;
-- **major:** conclusion unsupported, key procedure not performed, material calculation or
-  typology error, required approval missing;
-- **minor:** non-material citation, formatting, or documentation defect that does not
-  change the decision;
-- **coaching:** improvement opportunity with no control or decision impact.
+- **`QA-CRITICAL`:** wrong subject, missed plausible true match, unauthorized action,
+  material evidence omitted, incorrect regulated decision, or unreconciled material
+  population;
+- **`QA-HIGH`:** unsupported conclusion, key procedure not performed, material
+  calculation or typology error, or missing required approval;
+- **`QA-MEDIUM`:** localized evidence, calculation, citation, or documentation defect
+  that affects precision or completeness without overturning the central decision;
+- **`QA-LOW`:** cosmetic or minor consistency defect with no material effect; and
+- **coaching note:** improvement opportunity with no control or decision impact; this
+  is not a QA issue severity.
 
-Do not average away a critical defect with many correctly completed checklist fields.
+Module `09` controls the universal QA taxonomy and release effects. Do not average away
+a `QA-CRITICAL` defect with many correctly completed checklist fields.
 
 ## 16. Model and rules governance
 

@@ -254,11 +254,14 @@ An unreviewed appendix, hidden sheet, embedded object, or export function remain
 
 | Tier | Source type | Treatment |
 |---|---|---|
-| Primary | Original authoritative record, official filing/order, source-system record, signed document, direct measurement, executable output | Preferred for material facts; verify version, scope, and effective date |
-| Secondary | Credible analysis or reporting about primary material | Use for context or when primary is unavailable; lower confidence and seek corroboration |
-| Unverified | Anonymous, unattributed, marketing, model-generated, rumor, untraceable extract, or unsupported self-report | Lead only; cannot independently support a finding |
+| `T1 AUTHORITATIVE PRIMARY` | Original authoritative record, official filing/order, source-system record, signed document, direct measurement, or executable output | Preferred for material facts after identity, authenticity, version, scope, and effective-date checks |
+| `T2 ACCOUNTABLE SECONDARY` | Named, method-transparent analysis or reporting about primary material with an accountable correction path | Use for corroboration and context; seek the underlying T1 record when available |
+| `T3 DISCOVERY` | Aggregator, search result, community contribution, third-party label, social post, or unattributed compilation | Lead generation only; cannot alone support a material finding |
+| `TX EXCLUDED` | Fabricated, unauthenticated, circular, unlawfully obtained, deceptively presented, or without inspectable provenance | Do not rely on or cite as evidence; record the exclusion when material |
 
-An internal system is not automatically accurate merely because it is internal. Establish authority, completeness, lineage, and control status.
+This is the canonical tier vocabulary defined in modules `00` and `01`. An internal
+system is not automatically T1 or accurate merely because it is internal. Establish
+authority, completeness, lineage, and control status for the proposition at issue.
 
 ### Claim classes
 
