@@ -5,7 +5,7 @@ It consolidates research, OSINT, communications review, financial-crime intellig
 data quality, automation, quality assurance, and professional reporting into a small
 set of large, reusable Markdown modules.
 
-Current release: `v1.1.0` — 2026-08-14.
+Current release: `v1.2.0` — 2026-08-14.
 
 The package is designed for constrained work environments where a user can attach a
 limited number of reference files to an approved assistant. It is not a monitoring
@@ -62,22 +62,22 @@ The design goals are:
 
 If the environment supports a project knowledge base, load all fourteen Markdown files.
 If attachment capacity is limited, use the smallest bundle that covers the work. Check
-the [context budget](#context-budget) first: the full package is roughly 176,000 tokens
+the [context budget](#context-budget) first: the full package is roughly 186,000 tokens
 and several bundles exceed what a constrained assistant will accept.
 
 ## Recommended module bundles
 
 | Bundle | Modules | Approx. context | Fits |
 |---|---|---|---|
-| `core` | `00`, `07`, `09` | ~44k tokens | Provided materials; no external research or structured population |
-| `reporting` | `00`, `06`, `07`, `09` | ~59k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
-| `controls` | `00`, `05`, `06`, `07`, `09` | ~68k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
-| `operation` | `00`, `06`, `08`, `09`, `11` | ~72k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
-| `mailbox` | `00`, `03`, `06`, `07`, `09` | ~74k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
-| `research` | `00`, `01`, `02`, `07`, `09` | ~92k tokens | Public-source research, regulatory scans, background intelligence |
-| `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~113k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
-| `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~128k tokens | Case work that also depends on structured transaction or record data |
-| `full` | `00`–`11` | ~176k tokens | Project knowledge base or complex cross-domain operation |
+| `core` | `00`, `07`, `09` | ~45k tokens | Provided materials; no external research or structured population |
+| `reporting` | `00`, `06`, `07`, `09` | ~60k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
+| `controls` | `00`, `05`, `06`, `07`, `09` | ~71k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
+| `operation` | `00`, `06`, `08`, `09`, `11` | ~74k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
+| `mailbox` | `00`, `03`, `06`, `07`, `09` | ~75k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
+| `research` | `00`, `01`, `02`, `07`, `09` | ~97k tokens | Public-source research, regulatory scans, background intelligence |
+| `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~121k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
+| `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~136k tokens | Case work that also depends on structured transaction or record data |
+| `full` | `00`–`11` | ~186k tokens | Project knowledge base or complex cross-domain operation |
 
 This table is the same registry used by [`10-use-case-recipes.md`](toolkit/10-use-case-recipes.md)
 and by `bundle.py`. Validation fails if the three disagree.
@@ -97,17 +97,17 @@ that would have blocked it were never read. Check the size before loading.
 |---|---:|---:|
 | `00-operating-system.md` | 6,742 | ~11,700 |
 | `01-evidence-research-standard.md` | 7,338 | ~13,200 |
-| `02-osint-source-register.md` | 18,919 | ~34,300 |
+| `02-osint-source-register.md` | 21,546 | ~38,900 |
 | `03-mailbox-communications.md` | 8,073 | ~14,500 |
-| `04-intelligence-fincrime-frameworks.md` | 6,399 | ~12,100 |
-| `05-investigation-control-methods.md` | 4,778 | ~9,000 |
-| `06-data-quality-governance.md` | 7,899 | ~14,900 |
-| `07-output-templates.md` | 6,730 | ~11,900 |
-| `08-automation-orchestration.md` | 5,210 | ~10,100 |
-| `09-quality-assurance.md` | 11,061 | ~20,900 |
+| `04-intelligence-fincrime-frameworks.md` | 6,816 | ~12,800 |
+| `05-investigation-control-methods.md` | 6,101 | ~11,200 |
+| `06-data-quality-governance.md` | 8,110 | ~15,300 |
+| `07-output-templates.md` | 6,896 | ~12,100 |
+| `08-automation-orchestration.md` | 5,470 | ~10,500 |
+| `09-quality-assurance.md` | 11,149 | ~21,000 |
 | `10-use-case-recipes.md` | 4,470 | ~8,500 |
-| `11-deployment-security-maintenance.md` | 7,644 | ~14,800 |
-| **All twelve modules** | **95,263** | **~176,000** |
+| `11-deployment-security-maintenance.md` | 8,087 | ~15,700 |
+| **All twelve modules** | **100,798** | **~186,000** |
 
 Token figures are coarse estimates at four characters per token, published for
 attachment sizing only. They are not a tokenizer result and must not be cited as

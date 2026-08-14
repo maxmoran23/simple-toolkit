@@ -127,6 +127,7 @@ state:
   authority: "[one durable state store]"
   checkpoint_policy: "[step boundaries]"
   history_policy: "[retention and snapshots]"
+  stale_state_policy: "CONTINUE_LABELED|STOP"
   corruption_policy: "QUARANTINE_AND_ESCALATE"
 
 execution:
@@ -213,7 +214,7 @@ Required state properties:
 | `FIRST_RUN` | Initialize a declared empty baseline and record first-run mode. |
 | `MIGRATION_REQUIRED` | Stop before use; run an approved, tested state migration. |
 | `CORRUPT` | Quarantine the unreadable state, preserve prior versions, and escalate. Do not overwrite it with an empty state. |
-| `STALE` | Continue only if the manifest permits stale-state operation; label effect. |
+| `STALE` | State age exceeds the declared refresh interval. Continue only if the manifest's `stale_state_policy` permits it; label every conclusion with the state age. |
 | `UNAVAILABLE` | Apply the declared strict or degraded policy. An authority write later must still succeed. |
 
 ### Implementation-neutral run state
@@ -270,7 +271,7 @@ Checkpoint record:
 }
 ```
 
-Resume only from a valid checkpoint whose inputs, manifest, and instruction versions remain compatible. If compatibility is uncertain, restart from the last safe boundary without repeating external effects.
+Resume only from a valid checkpoint whose inputs, manifest, and instruction versions remain compatible: the same manifest schema version, the same instruction version, and inputs whose identity and watermark still match the checkpoint record. Any difference is incompatibility, not a judgment call. The last safe boundary is the most recent checkpoint written before the current step's first external side effect; when compatibility is uncertain, restart from that boundary without repeating external effects.
 
 ## Deterministic identities
 
@@ -384,7 +385,9 @@ delay = minimum(maximum_delay, base_delay * 2^(attempt - 1)) + bounded_jitter
 
 Rules:
 
-- Declare maximum attempts and elapsed retry budget in the manifest.
+- Declare maximum attempts and elapsed retry budget in the manifest. Where nothing is
+  declared, illustrative starting parameters are a 30-second base delay, a 15-minute
+  maximum delay, and jitter up to a fifth of the computed delay; tune to the source.
 - Honor the source's explicit retry instruction.
 - Do not retry authentication or authorization failures as if transient.
 - Count each attempt and cost against the run budget.
@@ -407,7 +410,7 @@ Fallbacks are suitable for informational continuity, not for concealing an unava
 
 Use `STRICT` for sanctions or other mandatory-list checks, production execution, official filings, identity-critical writes, authority-state persistence, and any decision where a weaker source could create false assurance.
 
-Every fallback record includes primary source, failure class, fallback selected, data age, fields lost, conclusions disabled, confidence effect, and incident threshold. Chronic fallback use is an operational defect, not a new normal.
+Every fallback record includes primary source, failure class, fallback selected, data age, fields lost, conclusions disabled, confidence effect, and incident threshold. Chronic fallback use is an operational defect, not a new normal: treat the same fallback firing on three consecutive runs, or on more than a fifth of runs in a rolling week, as an incident trigger rather than a trend line. Those are illustrative defaults; declare the streak and window in the manifest.
 
 ## Budget management
 
@@ -487,7 +490,7 @@ Specify:
 - manual rerun semantics;
 - maximum retained backlog.
 
-A schedule is not proof of execution. Record start, heartbeat, completion, and next expected run separately. Monitor liveness from outside the job when possible.
+A schedule is not proof of execution. Record start, heartbeat, completion, and next expected run separately. Monitor liveness from outside the job. Set the missed-run tolerance from the cadence: a run is missed once no completion record exists at one and a half times the scheduled interval past the expected start, unless `health_sla` declares otherwise. Where no external monitor exists, record that fact in the manifest and treat the job's own last-completion stamp as unverified liveness, not proof.
 
 ### First run
 
@@ -651,7 +654,7 @@ Alert on absence as well as failure. A deadman monitor should compare expected r
 | State corruption, persistent reconciliation failure, expired mandatory credential | HIGH |
 | Duplicate consequential action, unauthorized write, confirmed data exposure, missed irreversible deadline | CRITICAL |
 
-Adapt severity to actual impact. Do not page on every warning; do not bury a control failure in a daily digest.
+Adapt severity to actual impact through a defined mapping, not per-alert judgment: `repeated` means the same defect on two or more consecutive runs, and `persistent` means it survived one full recovery attempt. Page only HIGH and CRITICAL; batch MEDIUM into the daily digest; hold LOW for periodic review. Do not page on every warning; do not bury a control failure in a daily digest.
 
 ## Self-checks and evaluations
 
@@ -744,7 +747,7 @@ Do not log secrets, full tokens, authentication headers, unnecessary message bod
 
 ## Evidence artifacts
 
-Each material run should preserve, subject to retention policy:
+A material run is any run that changes durable state, emits an artifact, or takes an external action. Each material run must preserve, subject to retention policy:
 
 1. run manifest snapshot or version references;
 2. run record and state transitions;
@@ -766,7 +769,8 @@ Evidence must be generated from the run where practical, not manually re-created
 ### Incident triggers
 
 - state or manifest corruption;
-- unexplained input-volume collapse or surge;
+- input volume outside its declared band without a documented cause, by default below
+  half or above double the trailing-week median;
 - reconciliation failure;
 - repeated source fallback;
 - duplicate or ambiguous external action;

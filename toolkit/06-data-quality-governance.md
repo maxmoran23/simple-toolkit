@@ -228,7 +228,7 @@ Do not collapse these states to a single null unless the contract explicitly per
 
 ## 7. Data contracts
 
-A data contract binds producer and consumers to a versioned, testable agreement. Documentation alone is insufficient; contract checks should run at an appropriate enforcement point where capability exists.
+A data contract binds producer and consumers to a versioned, testable agreement. Documentation alone is insufficient. Enforce at the earliest point that can reject: at the producer boundary on publish where the platform supports it, otherwise at ingestion before first downstream use; where neither is possible, run the checks on a schedule against the landed data and record that enforcement is detective, not preventive.
 
 ### Contract layers
 
@@ -437,6 +437,22 @@ Do not compute `1 - defect_rate` as a general pass rate when some records were n
 | Lineage | CDE paths and critical transformations remain mapped | `required lineage edges observed` |
 | Privacy/security | Handling and use match approved controls | `classification/access/retention rule holds` |
 
+Illustrative concrete rules from published open implementations, shown for the
+specificity a governed rule needs rather than as production values:
+
+- Birth-date parse must be a strict calendar parse, so `1985-02-30` fails instead of
+  being coerced; a lenient parser silently invents a date.
+- Country codes must sit in the versioned ISO reference set as of the effective date, so
+  `UK` (not an ISO alpha-2 code), `EL` (a statistical convention), and the retired `SU`
+  all fail rather than passing as plausible strings.
+- Birth date after onboarding date is a cross-field impossibility, not two independently
+  valid fields.
+- Identifier validation computes the check digit instead of matching the format alone,
+  because format-valid fabricated identifiers are common.
+- Under the duplicate-symptom precedence control below, an invalid country suppresses
+  the dependent prefix-to-country mismatch on the same record, so counts measure
+  defects rather than echoes of one defect.
+
 ### Rule specification
 
 ```yaml
@@ -514,7 +530,8 @@ Do not adopt sample numbers, defaults, or industry folklore as policy. Record ho
 
 ### Bands
 
-Use distinct bands where appropriate:
+Every governed measure carries one of these bands; the hard-gate firing order below
+consumes them:
 
 - `OK`: within approved operating range;
 - `WATCH`: directional deterioration or proximity to breach;
@@ -931,7 +948,8 @@ Retain a versioned, non-sensitive fixture set covering every rule, critical tran
 
 - least privilege by product, field, environment, and action;
 - separate read, transform, approve, and release permissions;
-- periodic access review and timely revocation;
+- access review on a declared interval (quarterly for privileged access is a common
+  illustrative baseline) and revocation within a declared number of days of role change;
 - service identities with attributable ownership;
 - no shared credentials in code, prompts, logs, or artifacts;
 - break-glass access separately approved, time-bounded, and reviewed.

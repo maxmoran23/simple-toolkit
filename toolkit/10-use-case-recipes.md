@@ -42,15 +42,15 @@ Every substantial task -> include 00.
 
 | Bundle | Key | Modules | Approx. context | Fits |
 |---|---|---|---|---|
-| Core analysis | `core` | `00`, `07`, `09` | ~44k | provided materials, no external research or structured population |
-| Reporting and dashboards | `reporting` | `00`, `06`, `07`, `09` | ~59k | memo, workbook, deck, dashboard, or maintained tracker |
-| Data and controls | `controls` | `00`, `05`, `06`, `07`, `09` | ~68k | controls, testing, CDEs, lineage, issues, model/data review |
-| Maintained operation | `operation` | `00`, `06`, `08`, `09`, `11` | ~72k | recurring tracker or monitored workflow; add the domain modules the task needs |
-| Mailbox intelligence | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~74k | inbox, shared mailbox, chat, ticket, or intake corpus |
-| Research and OSINT | `research` | `00`, `01`, `02`, `07`, `09` | ~92k | public-source research, regulatory scans, background intelligence |
-| Entity and financial-crime | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~113k | entity, sanctions/PEP, adverse information, typology, case review |
-| Investigation and case review | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~128k | case work that also depends on structured transaction or record data |
-| Full system | `full` | `00`–`11` | ~176k | project knowledge base or complex cross-domain operation |
+| Core analysis | `core` | `00`, `07`, `09` | ~45k | provided materials, no external research or structured population |
+| Reporting and dashboards | `reporting` | `00`, `06`, `07`, `09` | ~60k | memo, workbook, deck, dashboard, or maintained tracker |
+| Data and controls | `controls` | `00`, `05`, `06`, `07`, `09` | ~71k | controls, testing, CDEs, lineage, issues, model/data review |
+| Maintained operation | `operation` | `00`, `06`, `08`, `09`, `11` | ~74k | recurring tracker or monitored workflow; add the domain modules the task needs |
+| Mailbox intelligence | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~75k | inbox, shared mailbox, chat, ticket, or intake corpus |
+| Research and OSINT | `research` | `00`, `01`, `02`, `07`, `09` | ~97k | public-source research, regulatory scans, background intelligence |
+| Entity and financial-crime | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~121k | entity, sanctions/PEP, adverse information, typology, case review |
+| Investigation and case review | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~136k | case work that also depends on structured transaction or record data |
+| Full system | `full` | `00`–`11` | ~186k | project knowledge base or complex cross-domain operation |
 
 This is the controlling bundle registry. The [repository README](../README.md) table and
 `bundle.py` restate it; validation fails if any of the three disagree. The key column is

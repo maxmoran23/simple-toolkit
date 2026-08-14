@@ -443,6 +443,19 @@ Each material output records the toolkit version or source commit used. A file m
 
 ## Current release record
 
+| Field | `v1.2.0` record |
+|---|---|
+| Version and date | `v1.2.0`; 2026-08-14 |
+| Source commits reviewed | `analyst-toolkit` and `Claude-Agent-Fleet` snapshots unchanged; re-verified against each repository's live default branch on 2026-08-14. This release absorbs decision-grade method from the audited `frameworks/*/METHODOLOGY.md` corpus that the initial consolidation had generalized away |
+| Files changed | [OSINT Source Register](02-osint-source-register.md) (74 added sources, workflow-pack range repair, registry version 1.1), [Intelligence and Financial-Crime Frameworks](04-intelligence-fincrime-frameworks.md), [Investigation and Control Methods](05-investigation-control-methods.md), [Data Quality and Governance](06-data-quality-governance.md), [Output Templates](07-output-templates.md), [Automation and Orchestration](08-automation-orchestration.md), [Quality Assurance](09-quality-assurance.md), this file, [Repository README](../README.md), [repository agent instructions](../AGENTS.md), `validate.py` (two added gates), new `linkcheck.py` |
+| Behavior and control changes | Expands the source register into fourteen previously absent jurisdictions and the thin PEP, corruption, law-enforcement, international-organization, digital-asset, and adverse-media domains; restores named auto-clear causes, non-clearable conditions, ownership threshold and aggregation discipline, alert auto-close discipline, named QA checks, and threshold-tuning method as method rather than calibrated policy; replaces enumerated vague passages with defined triggers and illustrative defaults; adds register row-completeness and workflow-pack ID gates; adds an on-demand reachability reporter that records access outcomes without asserting content currency. No authority, evidence, severity, confidence, completeness, or human-approval rule was weakened. |
+| Migration required | None. All changes are additive; bundles keep their names and membership, and their published context figures were restated to current measurements. |
+| Tests and review completed | Full `validate.py` gate and `bundle.py --selftest`; negative controls confirming the row-completeness gate rejects an empty Use cell and eight- and ten-cell rows, the pack-ID gate rejects an unknown cited ID, the release-pairing gate rejects a version without a record, and the duplicate-heading gate rejects a duplicated record heading; `linkcheck.py` offline selftest plus live not-found, timeout, redirect, and path-guard checks; a reachability sweep of all 74 added sources with wrong links corrected before release |
+| Known limitations | Ported numeric values are labeled illustrative and are not calibrated policy; register reachability was verified from one network position at one time, and several correct official sources are intermittently unreachable or TLS-misconfigured from abroad; context figures remain coarse four-characters-per-token estimates |
+| Rollback release | `v1.1.0`. Changes are additive content plus two validation gates and one optional reporter, so reverting to the prior release restores prior behavior with no state or migration impact. |
+
+## Prior release record — v1.1.0
+
 | Field | `v1.1.0` record |
 |---|---|
 | Version and date | `v1.1.0`; 2026-08-14 |
@@ -534,7 +547,7 @@ Run the regression program below. Compare representative outputs before and afte
 
 ## Regression program
 
-The repository may implement these checks as scripts or continuous-integration jobs. Until it does, treat them as a required manual checklist; do not claim automation.
+The deterministic structural subset of these checks is implemented in `validate.py` and runs in continuous integration on every push; `linkcheck.py` provides on-demand reachability reporting for register URLs and is deliberately not a CI job. Every remaining check is a required manual checklist item. Do not claim automation beyond what is implemented and tested.
 
 ### Repository checks
 
@@ -622,7 +635,7 @@ Do not combine unrelated metrics into a single health score that masks a hard fa
 
 ## Source provenance record
 
-This consolidation audited two public method repositories at immutable commits on 2026-08-13. Unrelated repositories were excluded from content and are not identified here because they supplied no reusable method.
+This consolidation audited two public method repositories at immutable commits on 2026-08-13. The snapshots were re-verified against each repository's live default branch on 2026-08-14 and remained at the audited commits. Unrelated repositories were excluded from content and are not identified here because they supplied no reusable method.
 
 | Source | Audited snapshot | Disposition and contribution |
 |---|---|---|
@@ -651,7 +664,7 @@ The source repositories remain independent and unchanged. The simplified toolkit
 | Other `prompts/` categories | `ABSORB` durable methods | [Evidence and Research Standard](01-evidence-research-standard.md), [Intelligence and Financial-Crime Frameworks](04-intelligence-fincrime-frameworks.md), [Investigation and Control Methods](05-investigation-control-methods.md), [Data Quality and Governance](06-data-quality-governance.md), [Use-Case Recipes](10-use-case-recipes.md) | Merge repeated task prompts into broad method libraries and recipes; remove one-file-per-niche-use-case duplication. |
 | `reference/` | `ABSORB` and `REFERENCE` | [Evidence and Research Standard](01-evidence-research-standard.md), [OSINT Source Register](02-osint-source-register.md), [Intelligence and Financial-Crime Frameworks](04-intelligence-fincrime-frameworks.md) | Consolidate public sources, typologies, entity types, and regulatory orientation; keep volatile claims tied to primary sources and as-of dates. |
 | `frameworks/` root contracts | `ABSORB` | [Operating System](00-operating-system.md), [Investigation and Control Methods](05-investigation-control-methods.md), [Data Quality and Governance](06-data-quality-governance.md), [Automation and Orchestration](08-automation-orchestration.md), [Quality Assurance](09-quality-assurance.md), this file | Preserve asymmetric-error posture, named reasons, reproducible evidence, model governance, deployment boundary, and mandatory safety gates. |
-| `frameworks/*/METHODOLOGY.md`, `README.md`, `tuning.md`, and source libraries | `ABSORB` durable generic logic | [OSINT Source Register](02-osint-source-register.md), [Intelligence and Financial-Crime Frameworks](04-intelligence-fincrime-frameworks.md), [Investigation and Control Methods](05-investigation-control-methods.md), [Data Quality and Governance](06-data-quality-governance.md) | Integrate typologies, decision structures, data rules, limitations, monitoring, and recalibration principles without claiming calibrated production performance. |
+| `frameworks/*/METHODOLOGY.md`, `README.md`, `tuning.md`, and source libraries | `ABSORB` durable generic logic | [OSINT Source Register](02-osint-source-register.md), [Intelligence and Financial-Crime Frameworks](04-intelligence-fincrime-frameworks.md), [Investigation and Control Methods](05-investigation-control-methods.md), [Data Quality and Governance](06-data-quality-governance.md), [Quality Assurance](09-quality-assurance.md) | Integrate typologies, decision structures, named disposition causes, data rules, limitations, monitoring, and recalibration principles without claiming calibrated production performance. Exact sampling logic landed in Quality Assurance. |
 | `frameworks/*` engines, test generators, fixtures, and evidence packs | `REFERENCE` or `EXCLUDE` from the lightweight package | [Quality Assurance](09-quality-assurance.md), this file | Source implementations remain available upstream. Generated metrics and synthetic datasets are not needed for the generic system library and must not be represented as validation of a new deployment. |
 | `standalone/` | `EXCLUDE` as duplicate payloads | [Operating System](00-operating-system.md), [Output Templates](07-output-templates.md), [Use-Case Recipes](10-use-case-recipes.md) | The simplified toolkit replaces renderer-embedded duplicates with one operating contract plus a specialist file. |
 | `teams/` | `ABSORB` navigation | [Repository README](../README.md), [Use-Case Recipes](10-use-case-recipes.md) | Convert team hubs into decision- and use-case-based routes that remain institution-neutral. |

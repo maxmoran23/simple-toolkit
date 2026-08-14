@@ -54,7 +54,9 @@ Do not allow a model-generated confidence score to substitute for reviewer judgm
    explanations.
 8. **Conclude:** compare facts to criteria; state disposition, severity, confidence,
    rationale, residual uncertainty, and recommendation.
-9. **Review:** perform independent or supervisory review appropriate to risk.
+9. **Review:** scale review to severity: CRITICAL and HIGH items get independent review
+   by someone outside the producing line before release, MEDIUM gets supervisory review,
+   and LOW may release under the standing sample-based QA in module `09`.
 10. **Act:** execute only authorized and approved actions with confirmation logging.
 11. **Close:** verify all conditions, preserve the evidence package, set retention and
     review date.
@@ -130,7 +132,12 @@ Assess each independently:
 - **vulnerability:** potential victim harm or exploitation requiring specialist handling;
 - **preservation risk:** evidence or funds may disappear without prompt authorized action.
 
-Use a deterministic rule table for routing where possible. Document every override.
+Route deterministically from these dimensions to a section 3.3 outcome: an active or
+imminent immediacy flag, preservation risk, or vulnerability flag routes to `urgent
+escalation`; systemic scope or a failed or bypassed control state routes to `systemic
+review`; a statutory or contractual deadline pins the queue and the clock; among the
+remainder, unavailable evidence becomes an `information request` and the rest a
+`standard investigation`. Document every override with the overriding fact.
 
 ### 3.3 Triage outcome
 
@@ -185,7 +192,8 @@ preferred_sources: []
 fallback_sources: []
 authorization_or_owner: <role>
 collection_status: requested|received|partial|unavailable
-completion_test: <what is enough>
+completion_test: <falsifiable stop condition, such as controlling record plus one
+  independent source agree on the decisive attribute or the divergence is documented>
 ```
 
 Collect proportionately. Do not expand into unrelated personal or commercial activity
@@ -213,7 +221,7 @@ Normalization generates candidates; it does not establish identity.
 
 | Class | Examples | Weight in resolution |
 |---|---|---|
-| Decisive unique | exact government/company identifier, IMO number, verified account ownership | usually sufficient if authentic and current |
+| Decisive unique | exact government/company identifier, IMO number, verified account ownership | sufficient if authentic, current, and uncontradicted; test those three before relying |
 | Strong | full birth date plus geography; legal name plus registered address/directors | high, but test conflicts |
 | Supporting | nationality, occupation, approximate age, related entities | corroborative only |
 | Weak | name alone, common address, shared service provider, generic job title | candidate generation only |
@@ -257,8 +265,9 @@ each list type and regime explicit.
 5. Investigate ownership/control, indirect exposure, and applicable program separately.
 6. Treat missing decisive data as unresolved, not as a mismatch.
 7. Document the exact reason for a false positive.
-8. Route possible true matches through the prescribed human escalation; do not notify or
-   act externally unless authorized.
+8. Route possible true matches, meaning any candidate not cleared by a named cause under
+   section 6.5, through the human escalation defined by section 1 decision rights; do
+   not notify or act externally unless authorized.
 
 ### 6.3 PEP analysis
 
@@ -267,12 +276,62 @@ source, and current/former status. Assess risk-relevant authority, corruption co
 products, geography, source of wealth/funds, and control response. PEP status alone does
 not establish wrongdoing and should not be presented as adverse conduct.
 
+Materiality is the product of three factors: function tier (head-of-state and
+national-executive level at the top, then senior officials, then junior or advisory
+functions), status decay (a former senior function loses weight with time but never
+reaches zero, while junior functions can time out under policy), and jurisdiction weight.
+Family members and close associates derive materiality from the principal, reduced but
+not dismissed while the principal remains material. Any credible adverse indicator
+suspends decay. State the three factors separately; a single blended label hides the
+reason for the rating.
+
 ### 6.4 Adverse information
 
 Confirm subject identity, original event, procedural status, date, outcome, and relevance.
 Group syndicated articles into one underlying event. Search for corrections and later
 developments. Distinguish allegations, charges, findings, settlements, appeals, and
 remediation.
+
+Assess relevance as the combination of event severity (terrorist financing and sanctions
+evasion at the top of the scale, then laundering, fraud and corruption, tax, regulatory,
+civil), subject role (perpetrator above alleged, association, victim, passing mention),
+recency, and source reliability. An old event of modest severity can close as stale and
+immaterial under a defined horizon; a severe event never ages out on time alone. Record
+which axis drove the disposition.
+
+### 6.5 Named disposition causes and non-clearable conditions
+
+A clearance is auditable only when it rests on a named, provable cause that a true match
+could not exhibit, never on a low match score alone. Map resolution outcomes
+(section 5.3) onto dispositions (section 6.1): `confirmed different` supports a false
+positive, `confirmed same` supports a true match, and every intermediate outcome is
+`unresolved` and stays with a human.
+
+Canonical clear causes, drawn from published open screening implementations and stated
+here as method, not calibrated policy:
+
+| List type | Named cause | Guard that keeps it safe |
+|---|---|---|
+| Sanctions | generic-token-only match: every aligned name token is common vocabulary | valid only when the list entry also carries a distinctive token the subject did not match; an entry whose own name is entirely generic is never cleared by name |
+| Sanctions | entity-type incompatibility: candidate and subject are different kinds of party | the type must come from the official record, not inference from the name |
+| Sanctions | named discriminator: an official identifier contradicts the candidate | unavailable when the name match is near-exact; an exact full-name match is never cleared by a single conflicting field |
+| PEP | identifier-proof wrong party | requires at least two independent contradicting fields; one conflicting field never clears |
+| PEP | out-of-scope status: former holder of a junior function beyond the policy horizon | unavailable for any current or senior-tier function and for any corroborated identifier |
+| Adverse media | wrong entity, non-adverse content, peripheral role (victim, witness, mention), or stale immaterial event | an uncorroborated common-name match routes to review, never to clearance |
+| On-chain exposure | benign source category, broken intermediary, de minimis value share, or attenuated distance | absent hop distance routes to review; never substitute an assumed hop count to reach a disposition |
+
+Conditions under which automated or analyst clearance is unreachable regardless of score:
+
+- any match to a currently designated party or a current senior public function;
+- any candidate with a corroborated identifier: corroborated identity goes to a human by rule;
+- missing decisive data: unresolved is a routing state, not a clearance;
+- an opaque or unreconciled layer anywhere in the relevant ownership graph;
+- a same-entity conclusion without at least one shared strong identifier;
+- an alert on which a defined typology pattern has fired (section 9.5);
+- a case carrying an open `QA-CRITICAL` defect (section 15.2).
+
+These constraints are deliberately asymmetric. They spend review effort to make a missed
+true match structurally hard, because the two error costs are not symmetric.
 
 ## 7. Customer or entity file review
 
@@ -335,6 +394,27 @@ separate relationship. Prevent double counting when paths converge.
 | Layer | Owner ID | Owned entity ID | Direct % | Indirect % to subject | Voting/control rights | Source | As of | Confidence |
 |---|---|---|---:|---:|---|---|---|---|
 
+### 8.4 Thresholds and aggregation discipline
+
+- Apply the jurisdiction's identification threshold for beneficial ownership. The widely
+  used public reference point is 25 percent of ownership interests (for example the
+  FinCEN customer due diligence rule), with control-based identification as a separate
+  prong that no percentage satisfies.
+- For sanctions exposure, apply the blocking rule of the relevant authority. Under the
+  published OFAC 50 Percent Rule the interests of sanctioned owners aggregate: two
+  designated parties holding 30 and 25 percent block the entity even though neither
+  alone reaches 50.
+- Treat a result just under a threshold as a review case, not a clean pass, and define
+  the near-threshold band in policy before calculating.
+- Control qualifies on substance: sole or decisive authority, or voting power at or
+  above the applicable fraction. An ordinary non-sole directorship does not by itself
+  establish control, and control routes to review rather than to a percentage.
+- Circular and cross-holding structures make simple path products undercount. Resolve
+  them as a converging series or equivalent method, cap any computed interest at 100
+  percent, and route non-converging or capped results to review.
+- Truncated evidence blocks clearance: when the ownership graph was cut off by data or
+  computation limits, the unexamined part cannot support a below-threshold conclusion.
+
 ## 9. Transaction and activity analysis
 
 ### 9.1 Preserve the ledger
@@ -383,6 +463,24 @@ starting_value + inbound_value - outbound_value - fees +/- valuation_effect
 When asset conversions or incomplete paths prevent exact reconciliation, state the
 valuation convention, residual, and uncertainty. Do not report percentage traced without
 a numerator, denominator, and boundary.
+
+### 9.5 Alert auto-close discipline
+
+A fired typology pattern is the signal that an alert cannot be closed without analyst
+review; auto-close is reachable only when no typology has fired. Named auto-close
+causes, stated as method rather than calibrated policy:
+
+- **Within profile:** every measured ratio sits inside the documented expected-activity
+  band and no rule fired above the minor-severity floor.
+- **Documented context:** each fired non-typology rule is explained by the recorded
+  business type, gated on total throughput rather than transaction count, because
+  count-based gating invites structuring just below the counter.
+- **Below pattern threshold:** an indicator is present but the defined pattern minimum
+  was not met, for example two near-threshold deposits where the structuring pattern
+  requires three; record the shortfall so repetition stays visible.
+
+The band between auto-close and mandatory escalation is deliberately not auto-closed.
+That band is the analyst workload, and removing it removes the control.
 
 ## 10. Investigation finding and disposition
 
@@ -491,7 +589,7 @@ criteria, frequency, evidence, and exception path.
 | Frequency | event-driven, continuous, daily, weekly, monthly, quarterly, annual |
 | Level | entity, process, transaction, system, model, data, third party |
 | Key status | would failure create material risk without timely compensating control? |
-| Precision | can the control detect/prevent the defined error or risk at required materiality? |
+| Precision | can the control detect/prevent the defined error at the materiality stated in the control objective? An objective with no stated materiality is a design gap |
 | Evidence | what immutable record demonstrates performance and review? |
 | Exception | how is failure identified, owned, escalated, corrected, and closed? |
 | Dependency | data, model, access, configuration, vendor, upstream/downstream control |
@@ -578,13 +676,15 @@ tolerable deviation, confidence, and selection method before selecting items.
 - Use random or systematic sampling when inference to a population is intended.
 - Use targeted/judgmental samples for risk discovery, not for unbiased population claims.
 - Stratify when size, severity, geography, channel, or control performer changes risk.
-- Test all critical or rare high-risk items when appropriate.
+- Test every item in a critical or rare high-risk stratum instead of sampling it.
 - Record seed or selected IDs for reproducibility.
 - Evaluate both count and nature of exceptions.
 
 If zero exceptions appear in `n` independent items, do not claim the deviation rate is
-zero. A simple approximate one-sided 95% upper bound is `3/n` (the rule of three) when
-its assumptions are appropriate. Use the exact approved method for formal conclusions.
+zero. For formal conclusions use the exact method in module `09`: a binomial or
+hypergeometric design whose zero-defect one-sided bound is `1 - alpha^(1/n)`, replacing
+table interpolation and normal approximations. The rule-of-three approximation `3/n` is
+acceptable only for quick internal sizing, never for a reliance conclusion.
 
 ### 13.5 Exception classification
 
@@ -669,6 +769,23 @@ Review the work, not just the final paragraph.
 Module `09` controls the universal QA taxonomy and release effects. Do not average away
 a `QA-CRITICAL` defect with many correctly completed checklist fields.
 
+### 15.3 Named QA checks
+
+Review against named checks, not a general impression. The core set:
+
+- wrong subject resolved; cleared with unreviewed scope; contradictory disposition,
+  where the narrative supports one outcome and the decision records another;
+- missed plausible true match; missed escalation trigger; unauthorized external action;
+- unsupported material fact; population not reconciled; calculation not reproducible;
+- required approval absent; broken evidence pointer; incomplete retention; SLA breach
+  beyond the defined material multiple.
+
+Score-only QA gates are unsafe. In the published open reference implementation this list
+derives from, files planted with critical deficiencies still scored 74 to 79 of 100,
+inside any plausible pass threshold, because many correct checklist fields average away
+one fatal defect. A critical finding must make the pass state unreachable
+(section 15.2), whatever the score says.
+
 ## 16. Model and rules governance
 
 For a scoring model, matcher, threshold, scenario, or automated classifier, document:
@@ -686,6 +803,13 @@ For a scoring model, matcher, threshold, scenario, or automated classifier, docu
 
 Prompt-only reasoning aids are not validated models merely because they contain scores.
 If a score influences decisions, it requires governance proportionate to impact.
+
+For detection thresholds, tune from a labeled review population using above-the-line
+productivity and below-the-line leakage, and recommend the highest threshold whose
+detection rate still meets the required recall floor. Tuning may trade alert volume
+against analyst capacity; it may never trade away required detection, so a candidate
+threshold below the floor is not an option at any volume saving. Keep a small tolerance
+band around the incumbent threshold to avoid churn from immaterial differences.
 
 ## 17. Policy-gap and obligation-to-control analysis
 

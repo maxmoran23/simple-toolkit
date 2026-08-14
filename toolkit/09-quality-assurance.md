@@ -871,6 +871,14 @@ Use independent, versioned evaluation sets that represent:
 - safe refusal, abstention, and escalation conditions;
 - prompt injection, instruction conflict, data exfiltration, tool misuse, and unsafe-action attempts.
 
+Population metrics cannot prove a safety property the population cannot express. A gate
+can stay green over every generated or historical case simply because no case in that
+population exercises the failure mode - absent fields, null distances, contradictory
+identifiers - so coverage of the metric was never coverage of the risk. For each safety
+property, construct at least one case that directly exercises the forbidden path and
+assert that the gate rejects it; a gate that has never been observed to reject is
+indistinguishable from no gate.
+
 Report:
 
 - exact task and version evaluated;

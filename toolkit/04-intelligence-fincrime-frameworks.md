@@ -80,7 +80,10 @@ analysis.
 | LOW | Informational, minor, remote, or well-controlled item | Record for context; no action unless pattern changes |
 
 Severity measures consequence and urgency. It is not source credibility, probability,
-or confidence.
+or confidence. When a tier is arguable, the discriminators are evidence and time:
+evidenced exposure with a near-term clock is HIGH, not MEDIUM, while uncertainty alone
+without evidenced exposure is MEDIUM, not HIGH. Record the discriminating fact next to
+the tier.
 
 ### 3.3 Confidence
 
@@ -215,6 +218,14 @@ rarely supports a conclusion.
 | Merchant or refund abuse | False purchases, collusion, or refund routing extracts value | high refund ratio; refund to different instrument; related merchant/customer | returns-heavy segment, operational correction | reconcile sales/shipping/refunds; network links; segment baseline |
 | Insider-enabled fraud | Authorized employee or contractor abuses access or overrides | unusual overrides; collusion links; off-hours access; control bypass | operational urgency, coverage role, training gap | preserve access logs; separate investigation authority; limit disclosure; legal/HR gate |
 
+Fraud disposition is dual-sided: a missed fraud and a false decline both harm real
+people, so both error rates carry explicit gates rather than only the fraud-miss rate.
+Reserve unconditional approval for sessions where every continuity fact holds (known
+device, strong authentication, no recent credential or contact change, established
+beneficiary); route uncertain cases to step-up authentication, which is a
+non-adverse outcome, before any decline. An adverse action needs corroborating
+typology evidence, not a single anomalous signal.
+
 ## 7. Sanctions, proliferation, and export-control risk
 
 ### 7.1 Exposure mechanisms
@@ -321,6 +332,14 @@ intent. State attribution source, directness, hop count, asset, chain, timestamp
 method, and confidence. Preserve transaction hashes and do not treat a vendor label as a
 confirmed identity without understanding its method and date.
 
+When a vendor export reports indirect exposure without a hop distance, treat distance as
+unknown and route to review; never substitute an assumed hop count to reach a
+disposition, because remoteness that cannot be shown cannot be relied on. Separate
+structural noise from signal with named observations before interpreting flows: dust and
+spam deposits below defined value floors, self-transfers between addresses under common
+control, and high-frequency same-counterparty churn each distort volume and counterparty
+counts if left unlabeled.
+
 ### 10.3 Protocol risk domains
 
 Assess at least:
@@ -356,6 +375,15 @@ correspondent banking, securities, bribery, data protection, or digital assets.
 Score only evidenced factors relevant to the use case. Record source date and review
 cadence. Do not convert a composite country index into a conclusion about a person.
 
+Public designations act as categorical raise-only floors that no composite score can
+dilute: comprehensive sanctions on the jurisdiction floor the rating at the highest
+tier; a FATF call-for-action listing floors it at the highest tier; FATF increased
+monitoring and the EU high-risk third-country list each floor it at a high tier. Compute
+the floor over the jurisdictions actually designated at the assessment date, cite the
+designation instrument, and show the pre-floor score alongside the floored rating.
+Exclude a missing dimension from the weighted denominator rather than scoring it as zero
+or a midpoint.
+
 ## 12. Entity and counterparty risk framework
 
 Use a multi-domain assessment. Tune weights to the stated risk appetite; never hide
@@ -388,9 +416,20 @@ weight changes.
 - A confirmed disqualifying fact may trigger a documented override. Keep the underlying
   weighted score visible.
 - Use score floors only for pre-defined confirmed conditions. A floor is a minimum, not
-  a substitute for analysis.
-- Run sensitivity: show whether a reasonable weight or score change alters the decision.
+  a substitute for analysis. Typical named floors in published open implementations:
+  confirmed political exposure floors the rating at no lower than the middle band;
+  a prior regulatory filing on the subject, confirmed adverse media, or an opaque
+  shell structure floors it at the high band. Label any adopted floor set as policy
+  once approved, and record who approved it.
+- Maintain any prohibited list as routing, not scoring: a prohibited attribute routes
+  the case out of the scoring path entirely, so there is no score at which it passes.
+- Run sensitivity as a defined test, for example moving any single domain by one band
+  and any single weight by a tenth of its value; report whether either movement changes
+  the final rating, and treat a rating that flips inside that envelope as
+  decision-fragile.
 - Calibrate against historical reviewed cases and monitor outcomes and overrides.
+- Verify monotonicity after any change: raising one risk factor may never lower the
+  final rating.
 
 Example calculation:
 

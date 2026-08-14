@@ -1,7 +1,7 @@
 # Official-Source Register for OSINT and Institutional Research
 
-Version: 1.0
-Registry review date: 2026-08-13
+Version: 1.1
+Registry review date: 2026-08-14
 Scope: public research starting points; no list or personal data is redistributed
 Companion control standard: `01-evidence-research-standard.md`
 
@@ -130,6 +130,14 @@ For each relied-on source, preserve the canonical URL, record ID, title, issuer,
 | 01.028 | T1 | Global/UN procurement | 01 | [UNGM vendor-sanctions API documentation](https://developer.ungm.org/Article/SearchVendorSanctions) | UN supplier ineligibility and sanctions records across participating agencies | EV | API,REG | Retrieval requires authorization; agency-specific results and sanction types can differ |
 | 01.029 | T1 | Global/law enforcement | 01 | [INTERPOL Red Notices](https://www.interpol.int/en/How-we-work/Notices/Red-Notices/View-Red-Notices) | Public extracts of notices seeking location/provisional arrest | EV | SEARCH | Public subset only; a Red Notice is not an international arrest warrant or guilt finding |
 | 01.030 | T1 | Global/travel security | 01 | [UN Security Council travel-ban and assets-freeze regime pages](https://main.un.org/securitycouncil/en/sanctions/information) | Measure-specific scope for designated subjects | EV | WEB | Measures and exemptions vary by committee; use regime detail |
+| 01.031 | T1 | United Arab Emirates | 01 | [UAE Executive Office sanctions lists](https://www.uaeiec.gov.ae/en-us/un-page) | UAE local terrorist list and UN implementation notices | EV | WEB,DL | Local list and UN implementation are separate instruments; Arabic notices control detail |
+| 01.032 | T1 | Israel | 01 | [National Bureau for Counter Terror Financing](https://nbctf.mod.gov.il/en) | Israeli terror-designation and seizure lists and downloads | EV | WEB,DL | Hebrew orders control; designation type and legal basis differ by entry |
+| 01.033 | T1 | Turkey | 01 | [MASAK asset-freeze decisions](https://masak.hmb.gov.tr/) | Turkish asset-freeze decisions under UN and domestic authority | EV | WEB | Turkish source; locate the current decision list and its official-gazette basis |
+| 01.034 | T1 | Ukraine | 01 | [NSDC State Register of Sanctions](https://drs.nsdc.gov.ua/) | Ukrainian sanctions decisions and designated persons | EV | SEARCH | Ukrainian interface; presidential decrees control scope and duration |
+| 01.035 | T1 | Argentina | 01 | [RePET public registry](https://repet.jus.gob.ar/) | Persons and entities linked to terrorism or its financing under Argentine law | EV | SEARCH,DL | Terrorism-related scope only; other Argentine measures sit elsewhere |
+| 01.036 | T1 | Philippines | 01 | [AMLC targeted financial sanctions](https://www.amlc.gov.ph/) | Anti-Terrorism Council designations and freeze notices | EV | WEB,DL | Locate the specific ATC resolution; site sections reorganize frequently |
+| 01.037 | T1 | Pakistan | 01 | [NACTA proscribed organizations](https://nacta.gov.pk/proscribed-organizations/) | Organizations and persons proscribed under Pakistani anti-terrorism law | EV | WEB | Intermittently reachable abroad; schedule updates and Urdu notifications may precede the site |
+| 01.038 | T2 | Global | 01 | [OpenSanctions](https://www.opensanctions.org/datasets/) | Cross-list discovery of sanctions, PEP, and watchlist data with source lineage | C | SEARCH,API,DL | Aggregator for discovery only; disposition against the issuing authority's current list |
 
 ### 8.2 AML/CFT/CPF standards and country assessment
 
@@ -183,6 +191,18 @@ No single free global PEP list is authoritative. Establish the public function f
 | 03.014 | T1 | South Africa | 03 | [Parliament of South Africa members](https://www.parliament.gov.za/group-details) | Parliamentary membership and party grouping | EV | WEB | Historical continuity and outside interests may require archived records |
 | 03.015 | T1 | Brazil | 03 | [Chamber of Deputies member data](https://www.camara.leg.br/deputados/quem-sao) | Federal deputy identities, terms, and profiles | EV | SEARCH,API | Senate, executive, state, and municipal offices are separate |
 | 03.016 | T1 | Global | 03 | [IPU Parline](https://data.ipu.org/) | National parliament structures and member data supplied through IPU | P | SEARCH | Coverage and update lag vary by parliament; verify with national source |
+| 03.017 | T1 | France | 03 | [HATVP declarations](https://www.hatvp.fr/consulter-les-declarations/) | French senior-official asset and interest declarations | EV | SEARCH | Covered functions and publication redactions are defined by statute |
+| 03.018 | T1 | France | 03 | [National Assembly deputies](https://www.assemblee-nationale.fr/dyn/vos-deputes) | Current French deputies, mandates, and declared functions | EV | SEARCH | Senate and prior legislatures require separate rosters |
+| 03.019 | T1 | Germany | 03 | [Bundestag members](https://www.bundestag.de/en/members) | Current German federal parliament members and roles | EV | SEARCH | State parliaments and past terms require separate sources |
+| 03.020 | T1 | Japan | 03 | [House of Representatives members](https://www.shugiin.go.jp/internet/itdb_english.nsf/html/statics/member/mem_a.htm) | Japanese lower-house membership | EV | WEB | English pages lag the Japanese roster; House of Councillors is separate |
+| 03.021 | T1 | Mexico | 03 | [Public-servant declaration search](https://servidorespublicos.gob.mx/) | Mexican federal public-servant asset and interest declarations | EV | SEARCH | Publicity levels vary by declaration type and officeholder |
+| 03.022 | T1 | Indonesia | 03 | [House of Representatives members](https://www.dpr.go.id/anggota) | Indonesian DPR membership and commissions | EV | WEB | Indonesian source; regional legislatures are separate |
+| 03.023 | T1 | Ukraine | 03 | [NAZK anti-corruption portal](https://nazk.gov.ua/en/) | Ukrainian integrity authority including the official declarations register | EV | SEARCH | Wartime access restrictions and filing exemptions affect declaration coverage |
+| 03.024 | T1 | United States | 03 | [Federal Judicial Center judge directory](https://www.fjc.gov/history/judges) | Article III federal-judge service history | C | SEARCH | Federal judiciary only; state judges require state sources |
+| 03.025 | T1 | Global/UN | 03 | [UN Protocol list of heads of state and government](https://www.un.org/dgacm/en/content/protocol/hshgnfa) | Officially communicated heads of state, government, and foreign ministers | P | WEB,DL | Reflects UN protocol communications; appointment dates require national confirmation |
+| 03.026 | T1 | Global | 03 | [CIA World Leaders directory](https://www.cia.gov/resources/world-leaders/foreign-governments/) | Cabinet-level officials of foreign governments | P | WEB | Compiled directory; verify office and dates with the appointing source |
+| 03.027 | T1 | United States | 03 | [State government directory](https://www.usa.gov/state-governments) | Entry point to US state governors and government offices | P | WEB | Directory of links; the state source records the office and term |
+| 03.028 | T1 | Norway | 03 | [State ownership reports](https://www.regjeringen.no/en/topics/business-and-industry/state-ownership/id1336/) | Norwegian state-enterprise portfolio and board information | A | WEB,DL | One jurisdiction's portfolio; SOE officer status elsewhere needs the owning ministry |
 
 ### 8.4 Corporate identity, ownership, and beneficial ownership
 
@@ -271,6 +291,9 @@ No single free global PEP list is authoritative. Establish the public function f
 | 05.026 | T1 | Brazil | 05 | [CVM regulated participant search](https://sistemas.cvm.gov.br/) | Public companies, funds, auditors, and market participants | C | SEARCH | Multiple systems; filings and enforcement require separate searches |
 | 05.027 | T1 | Mexico | 05 | [CNBV supervised-entity information](https://www.gob.mx/cnbv/es/acciones-y-programas/informacion-relevante-cnbv) | Authorized and supervised financial entities and sector data | C | WEB,DL | Spanish interface; entity type determines data source |
 | 05.028 | T1 | Global | 05 | [IOSCO investor alerts portal](https://www.iosco.org/i-scan/) | Warnings reported by securities regulators across jurisdictions | EV | SEARCH | Aggregates member alerts; retrieve the issuing regulator's original notice |
+| 05.029 | T1 | Thailand | 05 | [Securities and Exchange Commission](https://www.sec.or.th/EN) | Thai licensed securities operators, filings, and enforcement | C | SEARCH | Thai records control; license type and status need the register entry |
+| 05.030 | T1 | Taiwan | 05 | [Financial Supervisory Commission](https://www.fsc.gov.tw/en/) | Taiwanese securities, banking, and insurance supervision and licensees | C | WEB | English subset only; bureau-level registers hold the firm detail |
+| 05.031 | T1 | Egypt | 05 | [Financial Regulatory Authority](https://fra.gov.eg/) | Egyptian non-bank financial licensees and market decisions | C | WEB | Arabic source controls; register sections vary by sector |
 
 ### 8.6 Prudential, banking, insurance, and payments
 
@@ -301,6 +324,19 @@ No single free global PEP list is authoritative. Establish the public function f
 | 06.023 | T1 | Global | 06 | [IMF Financial Soundness Indicators](https://data.imf.org/fsi) | Cross-country banking soundness series | Q | API,DL | Country definitions, reporting institutions, and gaps vary |
 | 06.024 | T1 | Global | 06 | [World Bank Global Financial Development Database](https://www.worldbank.org/en/publication/gfdr/data/global-financial-development-database) | Financial-system depth, access, efficiency, and stability indicators | A | DL | Cross-country comparability and lag require methodology review |
 | 06.025 | T1 | Global/insurance | 06 | [IAIS member directory](https://www.iais.org/about-the-iais/iais-members/) | Official insurance-supervisor and member-jurisdiction links | P | WEB | Membership is not firm-level authorization data |
+| 06.026 | T1 | Indonesia | 06 | [Financial Services Authority](https://www.ojk.go.id/) | Indonesian licensed banks, nonbanks, and capital-market participants | C | WEB | Indonesian-first; sector registers and statistics sit in separate sections |
+| 06.027 | T1 | Philippines | 06 | [Bangko Sentral ng Pilipinas directories](https://www.bsp.gov.ph/SitePages/FinancialStability/DirBanksFIList.aspx) | Philippine bank and financial-institution directories | C | WEB,DL | Directory vintage matters; nonbank supervision is split with the SEC |
+| 06.028 | T1 | Vietnam | 06 | [State Bank of Vietnam](https://www.sbv.gov.vn/) | Vietnamese credit-institution licensing and supervision | C | WEB | Vietnamese source; the English subset is limited and may lag |
+| 06.029 | T1 | Malaysia | 06 | [Bank Negara Malaysia regulated institutions](https://www.bnm.gov.my/who-we-regulate) | Licensed Malaysian banks, insurers, and payment providers | C | WEB | License-category pages differ; Labuan entities use a separate authority |
+| 06.030 | T1 | Argentina | 06 | [Central Bank of Argentina financial entities](https://www.bcra.gob.ar/SistemasFinancierosYdePagos/Entidades_financieras.asp) | Authorized Argentine financial entities and institutional data | C | SEARCH | Spanish interface; entity class and authorization history need review |
+| 06.031 | T1 | Colombia | 06 | [Financial Superintendence of Colombia](https://www.superfinanciera.gov.co/) | Supervised Colombian financial entities and sanctions | C | WEB | Spanish source; register and sanction sections are separate |
+| 06.032 | T1 | Chile | 06 | [Commission for the Financial Market](https://www.cmfchile.cl/) | Chilean supervised entities, filings, and sanctions | C | SEARCH | Spanish source; banking and securities supervision merged into one register |
+| 06.033 | T1 | Peru | 06 | [Superintendence of Banking, Insurance and AFP](https://www.sbs.gob.pe/) | Peruvian supervised institutions and registers | C | WEB | Spanish source; the SBS also hosts Peru's FIU materials |
+| 06.034 | T1 | Qatar | 06 | [Qatar Central Bank](https://www.qcb.gov.qa/) | Licensed Qatari banks and financial institutions | C | WEB | QFC firms are regulated separately by the QFCRA |
+| 06.035 | T1 | Turkey | 06 | [Banking Regulation and Supervision Agency](https://www.bddk.org.tr/) | Licensed Turkish banks and financial institutions | C | WEB | Turkish source; capital-markets firms sit with the Capital Markets Board |
+| 06.036 | T1 | Morocco | 06 | [Bank Al-Maghrib](https://www.bkam.ma/) | Moroccan credit-institution licensing and supervision | C | WEB | French and Arabic source; capital markets use the AMMC |
+| 06.037 | T1 | Ghana | 06 | [Bank of Ghana](https://www.bog.gov.gh/) | Licensed Ghanaian banks and specialized deposit-takers | C | WEB,DL | License lists are period-published; verify current revocations |
+| 06.038 | T1 | Kenya | 06 | [Central Bank of Kenya](https://www.centralbank.go.ke/) | Licensed Kenyan banks, microfinance, and payment providers | C | WEB,DL | Directory pages by category; capital markets use the CMA |
 
 ### 8.7 Enforcement, courts, insolvency, and legal proceedings
 
@@ -413,6 +449,16 @@ No single free global PEP list is authoritative. Establish the public function f
 | 10.013 | T1 | Global/World Bank | 10 | [World Bank Integrity Vice Presidency](https://www.worldbank.org/en/about/unit/integrity-vice-presidency) | Investigation, sanctions-system, and integrity-compliance resources | EV/A | WEB,DL | Institutional administrative process, not a criminal court |
 | 10.014 | T2 | Global | 10 | [Basel AML Index](https://index.baselgovernance.org/) | Composite jurisdiction ML/TF risk including corruption dimensions | A | WEB,REG,DL | Composite methodology and missing data; not an entity-risk score |
 | 10.015 | T2 | Global | 10 | [U4 Anti-Corruption Resource Centre](https://www.u4.no/) | Sourced research on corruption risks, sectors, and interventions | P | SEARCH,DL | Research source, not an issuing authority or live enforcement register |
+| 10.016 | T1 | Brazil | 10 | [Portal da Transparência sanctions registers](https://portaldatransparencia.gov.br/sancoes) | CEIS/CNEP debarment and leniency registers for parties sanctioned in Brazil | C | SEARCH,DL | Administrative registers; scope, duration, and appeal status differ per entry |
+| 10.017 | T1 | Indonesia | 10 | [Corruption Eradication Commission](https://www.kpk.go.id/) | KPK investigations, prosecutions, and gratification enforcement | EV | WEB | Indonesian source; case stage differs from the later court outcome |
+| 10.018 | T1 | Nigeria | 10 | [Economic and Financial Crimes Commission](https://www.efcc.gov.ng/) | Nigerian financial-crime investigations, arraignments, and convictions | EV | WEB | Press releases precede judgments; retrieve the court disposition |
+| 10.019 | T1 | Ukraine | 10 | [National Anti-Corruption Bureau](https://nabu.gov.ua/en/) | Ukrainian high-level corruption investigations and case notices | EV | WEB | Notice of suspicion is not conviction; prosecutors and courts complete the record |
+| 10.020 | T1 | India | 10 | [Central Vigilance Commission](https://cvc.gov.in/) | Indian vigilance framework, advisories, and punished-official reporting | EV/A | WEB,DL | Advisory jurisdiction; prosecutions proceed through the CBI and courts |
+| 10.021 | T1 | Malaysia | 10 | [Malaysian Anti-Corruption Commission](https://www.sprm.gov.my/) | MACC arrest, charge, and conviction announcements | EV | WEB | Malay-first and intermittently reachable abroad; announcement stage differs from court outcome |
+| 10.022 | T1 | Kenya | 10 | [Ethics and Anti-Corruption Commission](https://eacc.go.ke/) | Kenyan corruption investigations, asset recovery, and reports | EV | WEB | Investigation and recovery stages differ; court records are separate |
+| 10.023 | T1 | France | 10 | [French Anti-Corruption Agency](https://www.agence-francaise-anticorruption.gouv.fr/) | AFA guidance, controls, and enforcement-committee decisions | EV/P | WEB,DL | French source; sanctions issue from courts and the enforcement committee |
+| 10.024 | T1 | Argentina | 10 | [Anti-Corruption Office](https://www.argentina.gob.ar/anticorrupcion) | Argentine integrity policy, declarations, and case participation | EV | WEB | Spanish source; judicial outcomes rest with the courts |
+| 10.025 | T1 | Global/UN | 10 | [UNCAC country profiles](https://www.unodc.org/corruption/en/uncac/country-profiles.html) | UNCAC implementation-review reports by state party | P | WEB,DL | Review cycles are uneven; executive summaries may be all that is public |
 
 ### 8.11 Fraud, cyber, and technical threat intelligence
 
@@ -458,6 +504,14 @@ No single free global PEP list is authoritative. Establish the public function f
 | 12.013 | T1 | Global/UN | 12 | [UN Counter-Terrorism Committee](https://www.un.org/securitycouncil/ctc/) | Country assessment, resolutions, and counterterrorism implementation context | P | WEB,DL | Not a wanted-person database or standalone designation list |
 | 12.014 | T1 | Global/UN | 12 | [UN 1267/1989/2253 ISIL and Al-Qaida Committee](https://main.un.org/securitycouncil/en/sanctions/1267) | Regime list, narrative summaries, exemptions, and updates | EV | WEB,DL | Regime-specific; national implementation remains necessary |
 | 12.015 | T2 | Global | 12 | [Global Organized Crime Index](https://ocindex.net/) | Country criminality and resilience indicators | P | WEB,DL | Expert-derived composite; not evidence about a named subject |
+| 12.016 | T1 | European Union | 12 | [Europol newsroom](https://www.europol.europa.eu/media-press/newsroom) | Joint-operation announcements, takedowns, and threat assessments | EV | SEARCH | Agency announcements; national prosecutions and court records are separate |
+| 12.017 | T1 | Canada | 12 | [Listed terrorist entities](https://www.publicsafety.gc.ca/cnt/ntnl-scrt/cntr-trrrsm/lstd-ntts/crrnt-lstd-ntts-en.aspx) | Entities listed under the Canadian Criminal Code | EV | WEB | Listing basis and review dates matter; separate from UN implementation |
+| 12.018 | T1 | Australia | 12 | [Listed terrorist organisations](https://www.nationalsecurity.gov.au/what-australia-is-doing/terrorist-organisations/listed-terrorist-organisations) | Organisations listed under Australian criminal law | EV | WEB | Relisting cycles and aliases matter; sanctions lists are separate instruments |
+| 12.019 | T1 | India | 12 | [Banned organisations](https://www.mha.gov.in/en/banned-organisations) | Organizations banned under Indian law including the UAPA | EV | WEB | Notification text controls; individual designations are separate |
+| 12.020 | T1 | Germany | 12 | [BKA wanted persons](https://www.bka.de/DE/IhreSicherheit/Fahndungen/Personen/personenfahndung_node.html) | German federal wanted-person notices | EV | WEB | German source; state police publish additional notices |
+| 12.021 | T1 | Netherlands | 12 | [National police wanted and missing](https://www.politie.nl/gezocht-en-vermist) | Dutch wanted-person and missing-person notices | EV | SEARCH | Dutch source; public subset only |
+| 12.022 | T1 | Global/UN | 12 | [UN 1988 Committee list](https://main.un.org/securitycouncil/en/sanctions/1988) | Taliban-related designations, exemptions, and updates | EV | WEB,DL | Regime-specific; distinct from the ISIL and Al-Qaida regime |
+| 12.023 | T1 | Global | 12 | [INTERPOL Stolen Works of Art Database](https://www.interpol.int/en/Crimes/Cultural-heritage-crime/Stolen-Works-of-Art-Database) | Reported stolen cultural-property records | C | SEARCH,REG | Access requires an account; absence does not establish clean provenance |
 
 ### 8.13 International organizations and development evidence
 
@@ -478,6 +532,13 @@ No single free global PEP list is authoritative. Establish the public function f
 | 13.013 | T1 | Global/WIPO | 13 | [WIPO Global Brand Database](https://branddb.wipo.int/) | Trademark records from international and participating national collections | C | SEARCH | Coverage and legal status depend on the office of record |
 | 13.014 | T1 | Global/FAO | 13 | [FAOSTAT](https://www.fao.org/faostat/en/) | Agriculture, food, land, emissions, and commodity statistics | A/P | SEARCH,API,DL | National reporting and estimation methods vary |
 | 13.015 | T1 | Global/UNESCO | 13 | [UNESCO Institute for Statistics](https://uis.unesco.org/) | Education, science, culture, and communication statistics | A/P | SEARCH,API,DL | Country coverage and time lags vary |
+| 13.016 | T1 | Global/BIS | 13 | [Basel Committee publications](https://www.bis.org/bcbs/) | Basel standards, guidance, and implementation reviews | P | WEB,DL | Standards bind through national implementation, not directly |
+| 13.017 | T1 | Global/FSB | 13 | [Financial Stability Board publications](https://www.fsb.org/publications/) | Global financial-stability standards, peer reviews, and assessments | P | WEB,DL | Recommendations require jurisdiction adoption; membership is limited |
+| 13.018 | T1 | Global/IMF | 13 | [Financial System Stability Assessments](https://www.imf.org/en/publications/fssa) | FSAP stability assessments including financial-integrity observations | P | SEARCH,DL | Assessment dates lag; detailed technical notes may be published separately |
+| 13.019 | T1 | Global/UN | 13 | [Security Council Panel of Experts reports](https://main.un.org/securitycouncil/en/sanctions/1718/panel_experts/reports) | Sanctions-evasion investigation reports by UN expert panels | P | WEB,DL | Panel findings are investigative, not judicial; mandates and access vary by regime |
+| 13.020 | T2 | Global | 13 | [EITI country data](https://eiti.org/countries) | Extractive-sector payment, license, and ownership disclosures | A | WEB,DL | Multi-stakeholder disclosures; completeness and validation status vary by country |
+| 13.021 | T1 | Europe/OSCE | 13 | [ODIHR election observation reports](https://www.osce.org/odihr/elections) | Election assessment reports across OSCE participating states | EV | WEB,DL | Observation scope and methodology are mission-specific |
+| 13.022 | T1 | Global/World Bank | 13 | [Stolen Asset Recovery Initiative](https://star.worldbank.org/) | Asset-recovery guidance, case data, and corruption-settlement tracking | P | WEB,DL | Case databases depend on public reporting and may lag or omit matters |
 
 ### 8.14 Statistical, economic, fiscal, and market data
 
@@ -567,6 +628,12 @@ Public-ledger facts and address attribution are different evidence classes. Tran
 | 16.022 | T1 | Dubai | 16 | [VARA public register](https://www.vara.ae/en/licenses-and-register/public-register/) | Licensed virtual-asset service providers and activities | C | SEARCH | Emirate/free-zone scope and license stage matter |
 | 16.023 | T1 | Abu Dhabi Global Market | 16 | [FSRA public register](https://www.adgm.com/public-registers/fsra) | Authorized persons and regulated activities including virtual assets | C | SEARCH | ADGM scope only; permission conditions must be read |
 | 16.024 | T1 | Global/securities regulators | 16 | [IOSCO crypto and digital-assets publications](https://www.iosco.org/publications/?subsection=public_reports) | International securities-regulatory policy and consultation materials | P | SEARCH,DL | Recommendations are not national law or firm-level authorization |
+| 16.025 | T1 | South Korea | 16 | [Korea Financial Intelligence Unit](https://www.kofiu.go.kr/eng/main.do) | Korean virtual-asset service-provider reporting status and AML notices | C | WEB | Korean pages control; current registration status needs the latest KoFIU notice |
+| 16.026 | T1 | Cayman Islands | 16 | [CIMA entity search](https://www.cima.ky/search-entities-cima) | Registered and licensed entities including virtual-asset providers | C | SEARCH | Registration category and phase determine permitted activity |
+| 16.027 | T1 | Ethereum network | 16 | [Ethereum Improvement Proposals](https://eips.ethereum.org/) | Canonical protocol and token-standard specifications | C | WEB | Specification status matters; deployed contracts can diverge from the standard |
+| 16.028 | T1 | Bitcoin network | 16 | [Bitcoin Improvement Proposals](https://github.com/bitcoin/bips) | Canonical Bitcoin protocol specification documents | C | WEB,DL | Repository status fields matter; network activation is separate from the document |
+| 16.029 | T3 | Multiple chains | 16 | [DefiLlama](https://defillama.com/) | DeFi protocol TVL, volumes, and listing discovery | C | SEARCH,API | Community adapters; TVL can double-count wrapped and restaked assets |
+| 16.030 | T2 | Ethereum/L2 | 16 | [L2BEAT](https://l2beat.com/scaling/summary) | Layer-2 risk assessments, stages, and value tracking | C | WEB | Published methodology but independent analysis; verify against contracts and official docs |
 
 ### 8.17 ESG, environment, labor, and human rights
 
@@ -617,6 +684,13 @@ This domain is primarily a discovery and corroboration layer. For conduct, retri
 | 18.016 | T2 | Media authenticity | 18 | [Content Credentials Verify](https://contentcredentials.org/verify) | Inspect C2PA provenance assertions in supported media | C | WEB | Missing credentials do not prove manipulation; credentials do not prove depicted claim |
 | 18.017 | T1 | United States/government web | 18 | [US Government Web Archive](https://www.loc.gov/web-archives/) | Curated historical captures of government and public-policy sites | P | SEARCH | Collection is selective and capture frequency varies |
 | 18.018 | T1 | United Kingdom/government web | 18 | [UK Government Web Archive](https://www.nationalarchives.gov.uk/webarchive/) | Historical UK central-government websites and social records | P | SEARCH | Interactive content and databases may not be captured fully |
+| 18.019 | T2 | Global | 18 | [AFP Fact Check](https://factcheck.afp.com/) | Multilingual verification reporting by a global news agency | C | SEARCH | Fact checks are secondary; retrieve the underlying records they cite |
+| 18.020 | T2 | Spanish-language | 18 | [El País](https://elpais.com/) | Accountable Spanish-language reporting and archives | C | SEARCH | Paywall applies; retrieve underlying records for conduct claims |
+| 18.021 | T2 | Japan | 18 | [NHK News](https://www3.nhk.or.jp/news/) | Japanese public-broadcaster reporting | C | WEB | Japanese source; article retention windows are short, so archive promptly |
+| 18.022 | T2 | Latin America | 18 | [CLIP investigations](https://www.elclip.org/) | Cross-border Latin American investigative reporting | P | WEB | Spanish-first; allegations require primary-record corroboration |
+| 18.023 | T2 | Africa | 18 | [amaBhungane](https://amabhungane.org/) | Southern African investigative journalism with document links | P | WEB | Regional scope; follow to filings and official records |
+| 18.024 | T3 | Global/web history | 18 | [archive.today](https://archive.ph/) | On-demand page captures where other archives lack coverage | C | SEARCH | No institutional custodian; capture requester and context are unverifiable |
+| 18.025 | T3 | Global | 18 | [OCCRP Aleph](https://aleph.occrp.org/) | Discovery across compiled public records and leaked datasets | C | SEARCH,REG | Mixed provenance and legality; leads only, corroborate from the source of record |
 
 ### 8.19 Open data, geospatial, maritime, and aviation
 
@@ -665,7 +739,7 @@ Use these packs as minimum starting points. Add the subject's jurisdictions, sec
 | Procurement integrity | Award sources in 08 plus debarments in 01 and registries in 04 | Amendments, lots, subcontractors, common identifiers, procurement challenge/cancellation, one-lineage duplicates |
 | Trade-control review | 01, 09.005–09.013, current legal text in 15 | Classification, origin, destination/end use/end user, licenses/exceptions, effective date; specialist decision |
 | Cyber threat brief | 11.001–11.003 and affected vendor advisory | CVE/CPE/version accuracy, exploitation evidence, patch status, attribution confidence, stale indicators |
-| Public-ledger investigation | 16.001–16.007, sanctions source 16.008, relevant license source 16.012–16.023 | Complete pagination, chain/asset separation, reorg/confirmation state, spam/dust, attribution firewall |
+| Public-ledger investigation | 16.001–16.007, sanctions source 16.008, relevant licensing source in 16 (for example 16.012–16.026) | Complete pagination, chain/asset separation, reorg/confirmation state, spam/dust, attribution firewall |
 | ESG/human-rights review | Applicable 17 sources plus issuer filings and enforcement sources | Self-reporting, scope/period, value-chain boundary, country-to-entity inference, grievance or outcome evidence |
 | Geospatial or asset verification | Relevant 19 source plus registry/filing and time-specific imagery | Capture time, coordinate system, resolution, legal-boundary limits, registered owner versus operator/control |
 

@@ -202,7 +202,8 @@ move detail to an appendix.
 - Use ISO `YYYY-MM-DD` in working tables unless the audience requires another display.
 - Show missing as `Not available`, `Not applicable`, or `Not collected`; do not blur
   these into blank or zero.
-- Show totals and denominators where meaningful.
+- Show totals for additive measures and a denominator for every rate; when a total would
+  mislead, state why it is omitted instead of omitting it silently.
 - Freeze and repeat headers; enable filters for row-level workbooks/dashboards.
 - Use restrained zebra shading or thin row rules, not full cell borders everywhere.
 - Put notes and caveats below the table, keyed to superscript or note ID.
@@ -403,8 +404,9 @@ Recommended sections:
 12. Appendices: data dictionary, calculations, search log, change log.
 
 For research, each major finding carries a confidence reason and at least one primary
-source when one should exist. Source count is not corroboration when many articles repeat
-one underlying report.
+source; the fallback chains in module `02` section 6 define where a primary record
+should exist, and when none does, say so explicitly and lower confidence. Source count
+is not corroboration when many articles repeat one underlying report.
 
 ## 13. Template: investigation or case report
 
@@ -780,8 +782,9 @@ Do not create empty tabs to appear comprehensive.
 - Use Excel tables with filters and structured references.
 - Freeze panes and repeat print headers.
 - Highlight approved input cells with one restrained fill and label them `Input`.
-- Lock formulas and protected structure when appropriate; document the password/owner
-  through an approved channel, never in the workbook.
+- Lock formula and structure cells in any workbook that leaves the producing team,
+  keeping only labeled `Input` regions unlocked; document the password/owner through an
+  approved channel, never in the workbook.
 - Use data validation lists tied to a controlled vocabulary table.
 - Use formulas or governed queries for summaries; do not type totals.
 - Separate actual, forecast, assumption, override, and calculated cells by style and
@@ -823,7 +826,8 @@ For material calculations, provide:
 - Verify filters, validation, conditional formatting, named ranges, protection, print
   areas, frozen panes, hidden rows/columns/tabs, external links, macros, and metadata.
 - Reconcile summary totals to detailed tabs and source controls.
-- Open and visually inspect every sheet at useful zoom and in print preview.
+- Open and visually inspect every sheet at normal size and 125 to 150 percent zoom, and
+  in print preview.
 
 ## 25. PowerPoint standard
 
@@ -912,7 +916,10 @@ drill-through and precise data, not page length.
 
 ### 26.3 Required interactions
 
-Include only when supported by the data and environment:
+Four are mandatory for any interactive dashboard: keyboard-accessible filters with
+reset, chart tooltips with exact values, visible loading/empty/partial/stale/error
+states, and a source link from each finding. Include the remainder when the data and
+environment support them:
 
 - keyboard-accessible filters with active-filter summary and reset;
 - sort and search with clear match count;
@@ -1045,6 +1052,11 @@ assistant. Do not keep a second, drifting copy of dashboard data.
 
 Never render a blank chart that a user could mistake for zero activity.
 
+Derive the staleness boundary from the declared refresh cadence rather than inventing it
+per page: data is `current` while its age is within the cadence, `stale` once age
+exceeds the cadence by the manifest's declared multiplier (1.5 is a reasonable
+illustrative default), and `failed` when a scheduled refresh did not complete at all.
+
 ## 27. Embedded analytical assistant standard
 
 An assistant inside a dashboard should make governed data easier to query; it must not
@@ -1171,7 +1183,9 @@ because the chart displays an aggregate.
 | HTML/dashboard | browser/runtime errors, responsive states, keyboard/accessibility, data parity, filters, export, print, source links, offline/network contract |
 | Email | recipients, subject, links/attachments, classification, HTML/plain text, mobile/client render, approval |
 
-Perform visual inspection. A successful file-generation call is not evidence that the
+Perform visual inspection with defined coverage: every page or slide for paginated
+formats, every sheet for workbooks, and every top-level view plus each empty, stale, and
+error state for dashboards. A successful file-generation call is not evidence that the
 artifact is correct.
 
 ## 30. Copy-ready renderer prompt
