@@ -40,18 +40,32 @@ Every substantial task -> include 00.
 
 ## 2. Standard bundles
 
-| Bundle | Modules | Fits |
-|---|---|---|
-| Core analysis | `00`, `07`, `09` | provided materials, no external research or structured population |
-| Research and OSINT | `00`, `01`, `02`, `07`, `09` | public-source research, regulatory scans, background intelligence |
-| Mailbox intelligence | `00`, `03`, `06`, `07`, `09` | inbox, shared mailbox, chat, ticket, or intake corpus |
-| Entity and financial-crime | `00`, `01`, `02`, `04`, `05`, `07`, `09` | entity, sanctions/PEP, adverse information, typology, case review |
-| Data and controls | `00`, `05`, `06`, `07`, `09` | controls, testing, CDEs, lineage, issues, model/data review |
-| Maintained operation | `00`, domain modules, `06`, `08`, `09`, `11` | recurring tracker, monitored workflow, controlled automation |
-| Full system | `AGENTS.md` and `00`–`11` | project knowledge base or complex cross-domain operation |
+| Bundle | Key | Modules | Approx. context | Fits |
+|---|---|---|---|---|
+| Core analysis | `core` | `00`, `07`, `09` | ~44k | provided materials, no external research or structured population |
+| Reporting and dashboards | `reporting` | `00`, `06`, `07`, `09` | ~59k | memo, workbook, deck, dashboard, or maintained tracker |
+| Data and controls | `controls` | `00`, `05`, `06`, `07`, `09` | ~68k | controls, testing, CDEs, lineage, issues, model/data review |
+| Maintained operation | `operation` | `00`, `06`, `08`, `09`, `11` | ~72k | recurring tracker or monitored workflow; add the domain modules the task needs |
+| Mailbox intelligence | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~74k | inbox, shared mailbox, chat, ticket, or intake corpus |
+| Research and OSINT | `research` | `00`, `01`, `02`, `07`, `09` | ~92k | public-source research, regulatory scans, background intelligence |
+| Entity and financial-crime | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~113k | entity, sanctions/PEP, adverse information, typology, case review |
+| Investigation and case review | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~128k | case work that also depends on structured transaction or record data |
+| Full system | `full` | `00`–`11` | ~176k | project knowledge base or complex cross-domain operation |
+
+This is the controlling bundle registry. The [repository README](../README.md) table and
+`bundle.py` restate it; validation fails if any of the three disagree. The key column is
+the argument to `python3 bundle.py --bundle <key>`, which assembles the bundle into one
+attachable file. Load `AGENTS.md` as repository instructions alongside any bundle when the
+environment supports it.
+
+Approximate context figures are coarse estimates at four characters per token, for
+attachment sizing only. Check them before loading: an assistant that truncates attached
+context does not announce it, and a partially loaded bundle can produce confident output
+under rules it never read. If a bundle does not fit, drop a domain module and state the
+reduced coverage in the output.
 
 Module `09` is not optional merely because the output is internal. Its gate should scale
-to impact and urgency.
+to impact and urgency, and it is never the module to drop for size.
 
 ## 3. Universal project brief
 

@@ -17,3 +17,7 @@ jobs:
           python-version: "3.12"
       - name: Validate toolkit
         run: python3 validate.py
+      - name: Verify bundle assembly
+        run: python3 bundle.py --selftest
+      - name: Confirm no generated output was committed
+        run: git diff --exit-code && test ! -d build

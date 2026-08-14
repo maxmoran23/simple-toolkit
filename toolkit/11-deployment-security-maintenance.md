@@ -441,6 +441,19 @@ Each release records:
 
 Each material output records the toolkit version or source commit used. A file modified outside a release must be identifiable as local and unverified.
 
+## Current release record
+
+| Field | `v1.1.0` record |
+|---|---|
+| Version and date | `v1.1.0`; 2026-08-14 |
+| Source commits reviewed | No new upstream absorption; `analyst-toolkit` and `Claude-Agent-Fleet` snapshots unchanged from `v1.0.0` and re-verified against `origin/main` |
+| Files changed | [Repository README](../README.md) (bundle registry, context budget, bundle build instructions), [Use-Case Recipes](10-use-case-recipes.md) section 2 (controlling bundle registry), `validate.py` (four added gates), new `bundle.py`, `.gitignore` |
+| Behavior and control changes | Publishes per-module and per-bundle context cost so a user can tell whether a bundle fits the assistant before loading; consolidates two divergent bundle tables into one controlling registry; adds the duplicate-heading check previously stated in [repository agent instructions](../AGENTS.md) but never implemented; adds drift gates binding the published word counts, bundle membership, and context figures to the files on disk; adds an optional assembler that emits one attachable file per bundle and marks every reference to a module it does not carry. No analytical, authority, evidence, severity, or approval rule changed. |
+| Migration required | None. Bundle names in the README now match [Use-Case Recipes](10-use-case-recipes.md); the previous README bundle labels were descriptive text, not identifiers, so no saved configuration breaks. |
+| Tests and review completed | Full `validate.py` gate; negative controls confirming each added gate rejects a falsified word count, a drifted bundle membership, an injected duplicate heading, and an overstated context figure; assembler verified for byte-identical determinism across runs, complete link resolution with zero dangling module references, and correct heading demotion |
+| Known limitations | Context figures are coarse four-characters-per-token estimates for attachment sizing, not tokenizer output, and must not be cited as measured values; the assembler reduces attachment count but not total context, so an oversized bundle stays oversized and is reported rather than trimmed; `bundle.py` is optional and the modules remain usable without it |
+| Rollback release | `v1.0.0`. The added files are additive and the module content is unchanged, so reverting to the prior tag restores the previous behavior with no state or migration impact. |
+
 ## Initial release record
 
 | Field | `v1.0.0` record |

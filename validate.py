@@ -36,8 +36,17 @@ REQUIRED_FILES = {
     "NOTICE",
     ".gitignore",
     "validate.py",
+    "bundle.py",
     ".github/workflows/validate.yml",
 }
+# Generated output lives here and is never committed or validated as content.
+IGNORED_DIRS = {".git", "build"}
+HEADING = re.compile(r"^#{1,6} ")
+BUDGET_ROW = re.compile(r"^\| `(?P<file>\d{2}-[a-z-]+\.md)` \| (?P<words>[\d,]+) \|", re.MULTILINE)
+BUDGET_TOTAL = re.compile(r"^\| \*\*All twelve modules\*\* \| \*\*(?P<words>[\d,]+)\*\* \|", re.MULTILINE)
+BUNDLE_TOKENS = re.compile(r"~(?P<k>\d+)k")
+# Approximate token figures are rounded by hand; allow drift below this width.
+TOKEN_TOLERANCE_K = 2
 MODULE_LINKS = [f"toolkit/{number:02d}-" for number in range(12)]
 SOURCE_ROW = re.compile(r"^\| (?P<id>\d{2}\.\d{3}) \| (?P<tier>T1|T2|T3|TX) \|", re.MULTILINE)
 MARKDOWN_LINK = re.compile(r"!?\[[^\]\n]*\]\((?P<target>[^)\n]+)\)")
@@ -66,8 +75,141 @@ def markdown_files() -> dict[str, Path]:
     return {
         path.relative_to(ROOT).as_posix(): path
         for path in ROOT.rglob("*.md")
-        if ".git" not in path.parts
+        if not IGNORED_DIRS.intersection(path.parts)
     }
+
+
+def strip_fences(text: str) -> list[str]:
+    """Return only the lines outside fenced code blocks.
+
+    Template payload inside fences frequently contains heading-shaped lines. They
+    are content, not document structure, and must not be treated as headings.
+    """
+    lines: list[str] = []
+    in_fence = False
+    for line in text.splitlines():
+        if FENCE.match(line):
+            in_fence = not in_fence
+            continue
+        if not in_fence:
+            lines.append(line)
+    return lines
+
+
+def check_headings(files: dict[str, Path], errors: list[str]) -> int:
+    """Enforce the duplicate-heading rule stated in AGENTS.md maintenance."""
+    total = 0
+    for rel, path in sorted(files.items()):
+        headings = [
+            line.strip()
+            for line in strip_fences(path.read_text(encoding="utf-8"))
+            if HEADING.match(line)
+        ]
+        total += len(headings)
+        duplicates = sorted(h for h, count in Counter(headings).items() if count > 1)
+        if duplicates:
+            shown = ", ".join(duplicates[:3])
+            fail(errors, f"{rel}: duplicate heading(s): {shown}")
+    return total
+
+
+def check_bundles(files: dict[str, Path], errors: list[str]) -> int:
+    """Keep bundle.py, the README table, and module 10 in exact agreement.
+
+    Three places describe the same bundle registry. Without this gate they drift,
+    and a user loading a bundle from the wrong table gets silently reduced
+    coverage.
+    """
+    bundle_path = ROOT / "bundle.py"
+    if not bundle_path.is_file():
+        return 0
+    namespace: dict[str, object] = {"__file__": str(bundle_path), "__name__": "_bundle"}
+    try:
+        exec(compile(bundle_path.read_text(encoding="utf-8"), str(bundle_path), "exec"), namespace)
+    except Exception as exc:  # pragma: no cover - surfaced as a validation error
+        fail(errors, f"bundle.py: failed to load bundle registry: {exc}")
+        return 0
+
+    bundles = namespace.get("BUNDLES")
+    chars_per_token = namespace.get("CHARS_PER_TOKEN", 4)
+    if not isinstance(bundles, dict):
+        fail(errors, "bundle.py: BUNDLES registry missing or malformed")
+        return 0
+
+    modules = {
+        rel.split("/")[-1][:2]: path
+        for rel, path in files.items()
+        if rel.startswith("toolkit/")
+    }
+    readme = files["README.md"].read_text(encoding="utf-8")
+    recipes = files["toolkit/10-use-case-recipes.md"].read_text(encoding="utf-8")
+
+    for key, spec in sorted(bundles.items()):
+        members = list(spec["modules"])
+        # `full` is written as a range in prose; compare the others literally.
+        if key != "full":
+            rendered = ", ".join(f"`{m}`" for m in members)
+            for label, text in (("README.md", readme), ("toolkit/10-use-case-recipes.md", recipes)):
+                if rendered not in text:
+                    fail(errors, f"{label}: bundle `{key}` module list does not match bundle.py")
+
+        estimate = sum(len(modules[m].read_text(encoding="utf-8")) for m in members if m in modules)
+        expected_k = round(estimate / chars_per_token / 1000)
+        for label, text in (("README.md", readme), ("toolkit/10-use-case-recipes.md", recipes)):
+            row = next(
+                (line for line in text.splitlines() if f"`{key}`" in line and "~" in line),
+                None,
+            )
+            if row is None:
+                fail(errors, f"{label}: bundle `{key}` has no context-size row")
+                continue
+            stated = BUNDLE_TOKENS.search(row)
+            if not stated:
+                fail(errors, f"{label}: bundle `{key}` row has no ~Nk context figure")
+                continue
+            if abs(int(stated.group("k")) - expected_k) > TOKEN_TOLERANCE_K:
+                fail(
+                    errors,
+                    f"{label}: bundle `{key}` states ~{stated.group('k')}k context; "
+                    f"disk implies ~{expected_k}k",
+                )
+    return len(bundles)
+
+
+def check_budget_table(files: dict[str, Path], errors: list[str]) -> None:
+    """Word counts published in the README must equal the files on disk."""
+    readme = files["README.md"].read_text(encoding="utf-8")
+    rows = list(BUDGET_ROW.finditer(readme))
+    if not rows:
+        fail(errors, "README.md: context budget table missing")
+        return
+
+    listed = 0
+    for match in rows:
+        name = match.group("file")
+        stated = int(match.group("words").replace(",", ""))
+        path = files.get(f"toolkit/{name}")
+        if path is None:
+            fail(errors, f"README.md: context budget lists unknown module {name}")
+            continue
+        actual = len(path.read_text(encoding="utf-8").split())
+        listed += actual
+        if stated != actual:
+            fail(errors, f"README.md: {name} listed at {stated:,} words; disk has {actual:,}")
+
+    expected_modules = len(EXPECTED_MARKDOWN) - 2
+    if len(rows) != expected_modules:
+        fail(errors, f"README.md: context budget covers {len(rows)} of {expected_modules} modules")
+
+    total = BUDGET_TOTAL.search(readme)
+    if not total:
+        fail(errors, "README.md: context budget total row missing")
+    elif int(total.group("words").replace(",", "")) != listed:
+        fail(
+            errors,
+            f"README.md: context budget total is {total.group('words')}; "
+            f"modules sum to {listed:,}",
+        )
 
 
 def check_inventory(files: dict[str, Path], errors: list[str]) -> None:
@@ -215,10 +357,21 @@ def check_release_controls(files: dict[str, Path], errors: list[str]) -> None:
     agents = files.get("AGENTS.md")
     workflow = ROOT / ".github/workflows/validate.yml"
 
-    if readme and "Current release: `v1.0.0`" not in readme.read_text(encoding="utf-8"):
-        fail(errors, "README.md: missing current release record")
+    version = None
+    if readme:
+        match = re.search(r"Current release: `(v\d+\.\d+\.\d+)`", readme.read_text(encoding="utf-8"))
+        if not match:
+            fail(errors, "README.md: missing or malformed current release record")
+        else:
+            version = match.group(1)
     if deployment:
         text = deployment.read_text(encoding="utf-8")
+        # The release the README advertises must have a record in module 11.
+        if version and f"| Version and date | `{version}`;" not in text:
+            fail(
+                errors,
+                f"toolkit/11-deployment-security-maintenance.md: no release record for {version}",
+            )
         if "## Initial release record" not in text or "| Rollback release |" not in text:
             fail(errors, "toolkit/11-deployment-security-maintenance.md: incomplete initial release record")
         if "github.com/maxmoran23/maxmoran23" in text:
@@ -256,6 +409,12 @@ def main() -> int:
     sources, tiers = check_registry(files, errors)
     check_terminology(files, errors)
     check_release_controls(files, errors)
+    headings = check_headings(files, errors)
+
+    bundles = 0
+    if {"README.md", "toolkit/10-use-case-recipes.md"} <= set(files):
+        bundles = check_bundles(files, errors)
+        check_budget_table(files, errors)
 
     if errors:
         print(f"FAIL: {len(errors)} validation error(s)")
@@ -266,9 +425,12 @@ def main() -> int:
     print("PASS: Simple Toolkit validation")
     print(f"- Markdown files: {len(files)}")
     print(f"- Lines / words: {lines:,} / {words:,}")
+    print(f"- Unique headings (fence-aware): {headings:,}")
     print(f"- Internal / external links: {internal:,} / {external:,}")
     print(f"- OSINT source entries: {sources:,}")
     print("- Source tiers: " + ", ".join(f"{tier}={count}" for tier, count in tiers.items()))
+    print(f"- Bundles reconciled across bundle.py, README, and module 10: {bundles}")
+    print("- Context budget word counts match disk: passed")
     print("- Privacy, unfinished-marker, emoji, HTTPS, fence, inventory, terminology, and release-control checks: passed")
     return 0
 

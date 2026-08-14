@@ -5,7 +5,7 @@ It consolidates research, OSINT, communications review, financial-crime intellig
 data quality, automation, quality assurance, and professional reporting into a small
 set of large, reusable Markdown modules.
 
-Current release: `v1.0.0` — 2026-08-13.
+Current release: `v1.1.0` — 2026-08-14.
 
 The package is designed for constrained work environments where a user can attach a
 limited number of reference files to an approved assistant. It is not a monitoring
@@ -61,24 +61,85 @@ The design goals are:
    [`09-quality-assurance.md`](toolkit/09-quality-assurance.md) before delivery.
 
 If the environment supports a project knowledge base, load all fourteen Markdown files.
-If attachment capacity is limited, use the smallest bundle that covers the work.
+If attachment capacity is limited, use the smallest bundle that covers the work. Check
+the [context budget](#context-budget) first: the full package is roughly 176,000 tokens
+and several bundles exceed what a constrained assistant will accept.
 
 ## Recommended module bundles
 
-| Work type | Load these modules |
-|---|---|
-| Research or regulatory scan | `00`, `01`, `02`, `07`, `09` |
-| Entity or counterparty assessment | `00`, `01`, `02`, `04`, `05`, `07`, `09` |
-| Mailbox or escalation-intake review | `00`, `03`, `06`, `07`, `09` |
-| Investigation or case review | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` |
-| Controls, testing, or issue remediation | `00`, `05`, `06`, `07`, `09` |
-| Dashboard, report, workbook, or presentation | `00`, `06`, `07`, `09` |
-| Recurring monitored workflow | `00`, relevant domain modules, `06`, `08`, `09`, `11` |
-| Full institutional agent context | `AGENTS.md` plus all numbered modules |
+| Bundle | Modules | Approx. context | Fits |
+|---|---|---|---|
+| `core` | `00`, `07`, `09` | ~44k tokens | Provided materials; no external research or structured population |
+| `reporting` | `00`, `06`, `07`, `09` | ~59k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
+| `controls` | `00`, `05`, `06`, `07`, `09` | ~68k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
+| `operation` | `00`, `06`, `08`, `09`, `11` | ~72k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
+| `mailbox` | `00`, `03`, `06`, `07`, `09` | ~74k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
+| `research` | `00`, `01`, `02`, `07`, `09` | ~92k tokens | Public-source research, regulatory scans, background intelligence |
+| `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~113k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
+| `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~128k tokens | Case work that also depends on structured transaction or record data |
+| `full` | `00`–`11` | ~176k tokens | Project knowledge base or complex cross-domain operation |
+
+This table is the same registry used by [`10-use-case-recipes.md`](toolkit/10-use-case-recipes.md)
+and by `bundle.py`. Validation fails if the three disagree.
 
 Module numbers are identifiers, not execution order. The controlling order is:
 
 `authority and scope -> evidence -> domain method -> data controls -> output -> QA -> action`
+
+## Context budget
+
+The package is large enough that a bundle can exceed what a constrained assistant
+will accept. An assistant that silently truncates attached context does not warn
+the user, so a half-loaded bundle can produce confident output while the rules
+that would have blocked it were never read. Check the size before loading.
+
+| Module | Words | Approx. tokens |
+|---|---:|---:|
+| `00-operating-system.md` | 6,742 | ~11,700 |
+| `01-evidence-research-standard.md` | 7,338 | ~13,200 |
+| `02-osint-source-register.md` | 18,919 | ~34,300 |
+| `03-mailbox-communications.md` | 8,073 | ~14,500 |
+| `04-intelligence-fincrime-frameworks.md` | 6,399 | ~12,100 |
+| `05-investigation-control-methods.md` | 4,778 | ~9,000 |
+| `06-data-quality-governance.md` | 7,899 | ~14,900 |
+| `07-output-templates.md` | 6,730 | ~11,900 |
+| `08-automation-orchestration.md` | 5,210 | ~10,100 |
+| `09-quality-assurance.md` | 11,061 | ~20,900 |
+| `10-use-case-recipes.md` | 4,470 | ~8,500 |
+| `11-deployment-security-maintenance.md` | 7,644 | ~14,800 |
+| **All twelve modules** | **95,263** | **~176,000** |
+
+Token figures are coarse estimates at four characters per token, published for
+attachment sizing only. They are not a tokenizer result and must not be cited as
+a measured value. Word counts are exact and checked by `validate.py`.
+
+Practical consequences:
+
+- `02-osint-source-register.md` is roughly a fifth of the package. Load it only
+  when the task actually needs source discovery, and prefer the workflow source
+  packs in its section 9 over the full registry.
+- If a bundle does not fit, remove a domain module and state the reduced
+  coverage in the output. Do not silently drop `09`.
+- When the assistant accepts few attachments, build one file instead.
+
+## Building a single-file bundle
+
+Constrained environments often allow only a small number of attachments and no
+repository access. `bundle.py` assembles any bundle into one Markdown file:
+
+```bash
+python3 bundle.py --list                        # bundles and their sizes
+python3 bundle.py --bundle mailbox              # write build/simple-toolkit-mailbox.md
+python3 bundle.py --modules 00,04,07 --name adhoc
+python3 bundle.py --bundle research --budget 60000
+```
+
+The assembler rewrites cross-module links to in-file anchors and explicitly
+marks every reference to a module that was not included, so a bundle cannot
+imply guidance it does not carry. Output is deterministic and written to the
+ignored `build/` directory; it is never committed. The tool is a convenience
+for transport only — the modules remain directly usable without it, and it adds
+no rule that is not already in the toolkit.
 
 ## Copy-ready task brief
 
@@ -172,8 +233,11 @@ python3 validate.py
 
 It enforces the fourteen-file Markdown inventory, internal-link resolution, HTTPS-only
 external links, OSINT registry IDs and domain coverage, balanced code fences, canonical
-confidence terminology, and public-repository hygiene. GitHub Actions runs the same gate
-on every push and pull request. External sites can move or block automated clients, so
+confidence terminology, fence-aware duplicate-heading detection, agreement between the
+bundle registry in `bundle.py` and both published bundle tables, agreement between the
+published context budget and the files on disk, release-record consistency, and
+public-repository hygiene. GitHub Actions runs the same gate on every push and pull
+request. External sites can move or block automated clients, so
 live source status remains a controlled maintenance task under module `11`, not a claim
 made solely from an HTTP status check.
 
