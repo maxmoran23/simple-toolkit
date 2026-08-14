@@ -232,14 +232,17 @@ python3 validate.py
 ```
 
 It enforces the fourteen-file Markdown inventory, internal-link resolution, HTTPS-only
-external links, OSINT registry IDs and domain coverage, balanced code fences, canonical
-confidence terminology, fence-aware duplicate-heading detection, agreement between the
-bundle registry in `bundle.py` and both published bundle tables, agreement between the
-published context budget and the files on disk, release-record consistency, and
-public-repository hygiene. GitHub Actions runs the same gate on every push and pull
-request. External sites can move or block automated clients, so
-live source status remains a controlled maintenance task under module `11`, not a claim
-made solely from an HTTP status check.
+external links, OSINT registry IDs, domain coverage, nine-cell row completeness, and
+workflow-pack ID resolution, balanced code fences, canonical confidence terminology,
+fence-aware duplicate-heading detection, agreement between the bundle registry in
+`bundle.py` and both published bundle tables, agreement between the published context
+budget and the files on disk, release-record consistency, and public-repository
+hygiene. GitHub Actions runs the same gate on every push and pull request. A separate
+on-demand reporter, `linkcheck.py`, probes register URLs and reports reachability only,
+recording anti-bot denials as an access outcome rather than source retirement; it is
+deliberately kept out of continuous integration. External sites can move or block
+automated clients, so live source status remains a controlled maintenance task under
+module `11`, not a claim made solely from an HTTP status check.
 
 ## License
 

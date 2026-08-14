@@ -223,8 +223,10 @@ If any condition fails, produce a draft or action proposal only.
 - Keep examples synthetic and generic.
 - Use direct, dense language. Avoid marketing claims and decorative filler.
 - Do not add employer names, internal systems, confidential processes, or real case data.
-- Validate internal Markdown links, disallowed terms, duplicate headings, file count, and
-  source-register structure before committing.
+- Run `python3 validate.py` before committing: links, disallowed terms, duplicate
+  headings, file inventory, register structure and row completeness, bundle and
+  context-budget agreement, and release records. Run `python3 linkcheck.py` after
+  changing register URLs; it reports reachability only, never content currency.
 - Record material changes and source refreshes under module `11`.
 
 ## Definition of done

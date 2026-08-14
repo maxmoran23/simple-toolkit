@@ -37,6 +37,7 @@ REQUIRED_FILES = {
     ".gitignore",
     "validate.py",
     "bundle.py",
+    "linkcheck.py",
     ".github/workflows/validate.yml",
 }
 # Generated output lives here and is never committed or validated as content.
@@ -330,6 +331,35 @@ def check_registry(files: dict[str, Path], errors: list[str]) -> tuple[int, dict
     for number in range(1, 20):
         if f"### 8.{number} " not in text:
             fail(errors, f"source register missing section 8.{number}")
+
+    # Every row must carry the full nine-cell schema with a real Use and a real
+    # Limits value. A row without an honest limitation invites over-reliance.
+    for match in matches:
+        source_id = match.group("id")
+        end = text.find("\n", match.start())
+        line = text[match.start() : end if end != -1 else len(text)].strip()
+        if not line.endswith("|"):
+            fail(errors, f"source register row {source_id}: row does not end with a cell delimiter")
+            continue
+        cells = [cell.strip() for cell in line[1:-1].split("|")]
+        if len(cells) != 9:
+            fail(errors, f"source register row {source_id}: has {len(cells)} cells; expected 9")
+            continue
+        if not cells[5]:
+            fail(errors, f"source register row {source_id}: empty Use cell")
+        if not cells[8]:
+            fail(errors, f"source register row {source_id}: empty Limits cell")
+
+    # Workflow packs cite rows by ID; a cited ID that no longer resolves sends
+    # the reader to nothing.
+    packs = re.search(r"(?ms)^## 9\. Workflow source packs$.*?(?=^## )", text)
+    if packs is None:
+        fail(errors, "source register missing section 9 workflow packs")
+    else:
+        cited = set(re.findall(r"\b\d{2}\.\d{3}\b", packs.group(0)))
+        unknown = sorted(cited - set(ids))
+        if unknown:
+            fail(errors, f"source register workflow packs cite unknown IDs: {', '.join(unknown)}")
     return len(ids), dict(sorted(tiers.items()))
 
 
@@ -431,6 +461,7 @@ def main() -> int:
     print("- Source tiers: " + ", ".join(f"{tier}={count}" for tier, count in tiers.items()))
     print(f"- Bundles reconciled across bundle.py, README, and module 10: {bundles}")
     print("- Context budget word counts match disk: passed")
+    print("- Register row completeness and workflow-pack ID resolution: passed")
     print("- Privacy, unfinished-marker, emoji, HTTPS, fence, inventory, terminology, and release-control checks: passed")
     return 0
 
