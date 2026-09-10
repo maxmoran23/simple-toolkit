@@ -228,7 +228,8 @@ class ProbeHandler(BaseHTTPRequestHandler):
 
     def do_HEAD(self):
         type(self).calls.append(('HEAD', self.path))
-        code = {'/ok': 204, '/blocked': 403, '/missing': 404, '/fallback': 405, '/redirect': 302}.get(self.path, 500)
+        code = {'/ok': 204, '/blocked': 403, '/missing': 404, '/head-missing': 404,
+                '/fallback': 405, '/redirect': 302}.get(self.path, 500)
         self.send_response(code)
         if code == 302:
             self.send_header('Location', 'http://127.0.0.1/private')
@@ -236,7 +237,7 @@ class ProbeHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         type(self).calls.append(('GET', self.path))
-        self.send_response(200)
+        self.send_response(404 if self.path == '/missing' else 200)
         self.end_headers()
 
 
@@ -265,6 +266,13 @@ class LinkcheckTests(unittest.TestCase):
         ProbeHandler.calls.clear()
         linkcheck.probe(self.base + '/blocked', 2)
         self.assertEqual(ProbeHandler.calls, [('HEAD', '/blocked')])
+
+    def test_head_404_get_retry_distinguishes_missing_page(self):
+        for path, expected in [('/head-missing', linkcheck.OK), ('/missing', linkcheck.ERROR)]:
+            with self.subTest(path=path):
+                ProbeHandler.calls.clear()
+                self.assertEqual(linkcheck.probe(self.base + path, 2)[0], expected)
+                self.assertEqual(ProbeHandler.calls, [('HEAD', path), ('GET', path)])
 
     def test_https_downgrade_redirect_blocked(self):
         status, detail = linkcheck.probe(self.base + '/redirect', 2)

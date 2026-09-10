@@ -97,7 +97,7 @@ that would have blocked it were never read. Check the size before loading.
 |---|---:|---:|
 | `00-operating-system.md` | 6,870 | ~11,889 |
 | `01-evidence-research-standard.md` | 7,447 | ~13,442 |
-| `02-osint-source-register.md` | 21,647 | ~39,124 |
+| `02-osint-source-register.md` | 21,650 | ~39,124 |
 | `03-mailbox-communications.md` | 8,203 | ~14,749 |
 | `04-intelligence-fincrime-frameworks.md` | 6,896 | ~12,955 |
 | `05-investigation-control-methods.md` | 6,260 | ~11,528 |
@@ -106,8 +106,8 @@ that would have blocked it were never read. Check the size before loading.
 | `08-automation-orchestration.md` | 5,586 | ~10,716 |
 | `09-quality-assurance.md` | 11,285 | ~21,284 |
 | `10-use-case-recipes.md` | 4,604 | ~8,694 |
-| `11-deployment-security-maintenance.md` | 8,705 | ~16,868 |
-| **All twelve modules** | **102,782** | **~189,145** |
+| `11-deployment-security-maintenance.md` | 8,779 | ~17,003 |
+| **All twelve modules** | **102,859** | **~189,280** |
 
 Token figures are coarse estimates at four characters per token, published for
 attachment sizing only. They are not a tokenizer result and must not be cited as

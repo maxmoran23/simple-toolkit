@@ -51,8 +51,9 @@ TIMEOUT = "TIMEOUT"
 # Identify the probe honestly; browser access may produce a different outcome.
 USER_AGENT = "SimpleToolkit-Linkcheck/1.3 (+https://github.com/maxmoran23/simple-toolkit)"
 HEADERS = {"User-Agent": USER_AGENT, "Accept": "*/*"}
-# Servers that reject HEAD outright get one GET retry; a 403/429 stays BLOCKED.
-HEAD_RETRY_CODES = {400, 405, 501}
+# Some official sites return 404 for HEAD while GET serves the same URL.
+# One GET distinguishes that behavior from a missing page; 403/429 stays BLOCKED.
+HEAD_RETRY_CODES = {400, 404, 405, 501}
 
 DISCLAIMER = (
     "A working link does not establish that the underlying record is current, "
