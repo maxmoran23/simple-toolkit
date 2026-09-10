@@ -453,6 +453,19 @@ Each material output records the toolkit version or source commit used. A file m
 
 ## Current release record
 
+| Field | `v1.3.1` record |
+|---|---|
+| Version and date | `v1.3.1`; 2026-09-10 |
+| Source commits reviewed | `simple-toolkit` at `6ff422d` (`v1.3.0`). No source-register URL or source-currency claim changed. |
+| Files changed | Bundle assembler, context reporter, focused-source regression tests, repository README and this release record. |
+| Behavior and control changes | Adds optional complete source-domain table selection with explicit section-dependency closure; preserves all register governance and methods; reports requested, automatically added, included and omitted domains plus exact source-row counts. Adds selector inventory and focused context reporting. Default module membership and full-register assembly remain unchanged. |
+| Migration required | None. Use `--source-domains` only when the task's source needs are known; regenerate attachments and provenance sidecars to use it. Existing invocations retain the full register. |
+| Validation commands | `python3 validate.py`; `python3 bundle.py --selftest`; `python3 linkcheck.py --selftest`; `python3 -m unittest discover -s tests -v`. Focused tests cover deterministic output, complete tables, retained governance, transitive section dependencies, manifest hashes, resolved fragments, invalid selection rejection and strict size rejection without output. |
+| Known limitations | Domain selection reduces transport size; it does not select jurisdictions, establish complete task coverage, or refresh sources. Workflow packs and prose can mention omitted source IDs; only explicit section links expand dependencies automatically. Estimates use four characters per token and are not tokenizer measurements. |
+| Rollback release | `6ff422d` (`v1.3.0`); reassemble from that source revision and compare stored output hashes. No external state migration is required. |
+
+## Prior release record — v1.3.0
+
 | Field | `v1.3.0` record |
 |---|---|
 | Version and date | `v1.3.0`; 2026-09-10 |

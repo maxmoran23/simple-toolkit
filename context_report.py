@@ -8,7 +8,7 @@ import json
 import bundle
 
 
-def report() -> dict:
+def report(source_domains: list[str] | None = None) -> dict:
     modules = []
     for number, path in bundle.module_files().items():
         text = path.read_text(encoding="utf-8")
@@ -16,8 +16,9 @@ def report() -> dict:
                         "characters": len(text), "estimated_tokens": bundle.estimate_tokens(text)})
     bundles = []
     for key, spec in bundle.BUNDLES.items():
-        _, stats = bundle.build(list(spec["modules"]), key, None)
-        bundles.append({"bundle": key, "modules": spec["modules"], **stats})
+        _, stats = bundle.build(list(spec["modules"]), key, None,
+                                source_domains if "02" in spec["modules"] else None)
+        bundles.append({"bundle": key, "module_ids": list(spec["modules"]), **stats})
     return {"schema_version": 1, "method": "ceil(Unicode characters/4), not a tokenizer",
             "modules": modules, "bundles": bundles,
             "total_words": sum(row["words"] for row in modules),
@@ -27,11 +28,17 @@ def report() -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true", help="emit machine-readable counts")
+    parser.add_argument("--source-domains", help="size bundles with focused module 02 tables, e.g. 01,16; raw module counts stay complete")
     args = parser.parse_args()
-    payload = report()
+    try:
+        payload = report([code.strip() for code in args.source_domains.split(",")] if args.source_domains is not None else None)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
     if args.json:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
+        if args.source_domains is not None:
+            print("Focused source domains apply only to bundles containing module 02. Raw module sizes below remain complete.\n")
         print("| Module | Words | Approx. tokens |\n|---|---:|---:|")
         for row in payload["modules"]:
             print(f"| `{row['file']}` | {row['words']:,} | ~{row['estimated_tokens']:,} |")

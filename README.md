@@ -5,7 +5,7 @@ It consolidates research, OSINT, communications review, financial-crime intellig
 data quality, automation, quality assurance, and professional reporting into a small
 set of large, reusable Markdown modules.
 
-Current release: `v1.3.0` — 2026-09-10.
+Current release: `v1.3.1` — 2026-09-10.
 
 The package is designed for constrained work environments where a user can attach a
 limited number of reference files to an approved assistant. It is not a monitoring
@@ -62,7 +62,7 @@ The design goals are:
 
 If the environment supports a project knowledge base, load all fourteen Markdown files.
 If attachment capacity is limited, use the smallest bundle that covers the work. Check
-the [context budget](#context-budget) first: the full package is roughly 186,000 tokens
+the [context budget](#context-budget) first: the full package is roughly 190,000 tokens
 and several bundles exceed what a constrained assistant will accept.
 
 ## Recommended module bundles
@@ -72,12 +72,12 @@ and several bundles exceed what a constrained assistant will accept.
 | `core` | `00`, `07`, `09` | ~46k tokens | Provided materials; no external research or structured population |
 | `reporting` | `00`, `06`, `07`, `09` | ~62k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
 | `controls` | `00`, `05`, `06`, `07`, `09` | ~73k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
-| `operation` | `00`, `06`, `08`, `09`, `11` | ~77k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
+| `operation` | `00`, `06`, `08`, `09`, `11` | ~78k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
 | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~76k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
 | `research` | `00`, `01`, `02`, `07`, `09` | ~99k tokens | Public-source research, regulatory scans, background intelligence |
 | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~123k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
 | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~139k tokens | Case work that also depends on structured transaction or record data |
-| `full` | `00`–`11` | ~189k tokens | Project knowledge base or complex cross-domain operation |
+| `full` | `00`–`11` | ~190k tokens | Project knowledge base or complex cross-domain operation |
 
 This table is the same registry used by [`10-use-case-recipes.md`](toolkit/10-use-case-recipes.md)
 and by `bundle.py`. Validation fails if the three disagree.
@@ -106,8 +106,8 @@ that would have blocked it were never read. Check the size before loading.
 | `08-automation-orchestration.md` | 5,586 | ~10,716 |
 | `09-quality-assurance.md` | 11,285 | ~21,284 |
 | `10-use-case-recipes.md` | 4,604 | ~8,694 |
-| `11-deployment-security-maintenance.md` | 8,452 | ~16,400 |
-| **All twelve modules** | **102,529** | **~188,677** |
+| `11-deployment-security-maintenance.md` | 8,705 | ~16,868 |
+| **All twelve modules** | **102,782** | **~189,145** |
 
 Token figures are coarse estimates at four characters per token, published for
 attachment sizing only. They are not a tokenizer result and must not be cited as
@@ -153,6 +153,33 @@ Custom selections report missing operating or QA modules explicitly.
 Use `python3 context_report.py --json` for machine-readable size data. The module
 budget measures raw files; the bundle tables and `--list` include assembly overhead.
 Section anchors are added only where a link needs them to limit transport cost.
+
+### Focus the source register
+
+Keep the complete analytical methods and load only the source-domain tables relevant
+to the task. Domain codes come from module `02`'s numbered taxonomy; `01` below means
+sanctions sources and `16` means digital-asset sources, not module numbers.
+
+```bash
+python3 bundle.py --list-source-domains
+python3 bundle.py --bundle research --source-domains 01,16 --name research-focused --manifest
+python3 context_report.py --source-domains 01,16 --json
+```
+
+`--source-domains` retains all register guidance outside section `8` and complete tables
+for the selected domains. It automatically adds domains targeted by explicit section
+links in the included guidance, repeating until those dependencies resolve. The bundle
+and its manifest identify requested, added, included, and omitted domains plus exact
+source-row counts. Whole-file source hashes identify the original inputs; the output
+hash identifies the assembled extract. Without this option, all domain tables remain.
+Unknown, empty, duplicate, or absent-module selections fail before writing output.
+
+The retained taxonomy and workflow packs can mention sources outside the selected
+tables. These references do not mean those entries were loaded: add every domain the
+actual task needs. Domain selection does not infer jurisdiction coverage, refresh any
+source, or establish a complete investigation. Explicit section dependencies are
+resolved; source IDs mentioned in prose do not trigger automatic expansion. Combine
+with `--budget` and `--strict-budget` to size the actual focused assembly before writing.
 
 ## Copy-ready task brief
 

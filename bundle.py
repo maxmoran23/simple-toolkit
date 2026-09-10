@@ -240,7 +240,89 @@ def atomic_write(destination: Path, content: str) -> None:
         Path(temporary).unlink(missing_ok=True)
 
 
-def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[str, int]]:
+def source_domain_sections(text: str) -> dict[str, dict[str, object]]:
+    """Locate complete registry tables using parsed headings, never text slicing guesses."""
+    headings = list(md.headings(text))
+    registry = next((i for i, row in enumerate(headings) if row[1:3] == (2, "8. Registry")), None)
+    if registry is None:
+        raise ValueError("source register is missing section 8. Registry")
+    following = headings[registry + 1:]
+    ending = next((row[0] for row in following if row[1] <= 2), len(text.splitlines()))
+    starts = []
+    for line, level, label, anchor in following:
+        if line >= ending:
+            break
+        if level == 3:
+            match = re.fullmatch(r"8\.([1-9][0-9]?) (.+)", label)
+            if not match:
+                raise ValueError(f"unrecognized source domain heading: {label}")
+            starts.append((line, match[1].zfill(2), match[2], anchor))
+    if not starts or len({row[1] for row in starts}) != len(starts):
+        raise ValueError("source register needs distinct numbered domain tables")
+    lines = text.splitlines(keepends=True)
+    sections = {}
+    for i, (start, code, label, anchor) in enumerate(starts):
+        end = starts[i + 1][0] if i + 1 < len(starts) else ending
+        section = "".join(lines[start:end])
+        rows = len(re.findall(r"^\| \d{2}\.\d{3} \|", section, re.MULTILINE))
+        if not rows:
+            raise ValueError(f"source domain {code} has no source rows")
+        sections[code] = {"title": label, "anchor": anchor, "start": start, "end": end,
+                          "rows": rows, "estimated_tokens": estimate_tokens(section)}
+    return sections
+
+
+def select_source_domains(source_texts: dict[str, str], requested: list[str]) -> dict[str, object]:
+    """Retain all register governance plus the requested tables and explicit dependencies."""
+    if "02" not in source_texts:
+        raise ValueError("--source-domains requires module 02 in the bundle")
+    sections = source_domain_sections(source_texts["02"])
+    if not requested or len(set(requested)) != len(requested):
+        raise ValueError("select at least one source domain, without duplicates")
+    unknown = [code for code in requested if code not in sections]
+    if unknown:
+        raise ValueError(f"unknown source domain(s): {', '.join(unknown)}; use --list-source-domains")
+    original = source_texts["02"]
+    lines = original.splitlines(keepends=True)
+    owners = {anchor: code for line, _, _, anchor in md.headings(original)
+              for code, row in sections.items() if row["start"] <= line < row["end"]}
+    retained = set(requested)
+
+    def subset() -> str:
+        omitted = {line for code, row in sections.items() if code not in retained
+                   for line in range(row["start"], row["end"])}
+        return "".join(line for i, line in enumerate(lines) if i not in omitted)
+
+    while True:
+        source_texts["02"] = subset()
+        needed = set()
+        for number, text in source_texts.items():
+            for link in md.links(text):
+                kind, fragment = resolve_target(link.target)
+                if link.target.startswith("#"):
+                    kind = number
+                if kind == "02" and fragment in owners:
+                    needed.add(owners[fragment])
+        if needed <= retained:
+            break
+        retained |= needed
+    return {"requested_domains": sorted(requested), "included_domains": sorted(retained),
+            "dependency_domains": sorted(retained - set(requested)),
+            "omitted_domains": sorted(set(sections) - retained),
+            "included_source_rows": sum(sections[code]["rows"] for code in retained),
+            "total_source_rows": sum(row["rows"] for row in sections.values()),
+            "selection_rule": "complete domain tables; retain explicit fragment dependencies and all non-registry guidance"}
+
+
+def list_source_domains() -> None:
+    files = module_files()
+    for code, row in source_domain_sections(files["02"].read_text(encoding="utf-8")).items():
+        print(f"{code}  {row['rows']:>3} sources  ~{row['estimated_tokens']:>5,} tokens  {row['title']}")
+    print("Table sizes exclude retained governance and bundle overhead; estimates use characters/4.")
+
+
+def build(modules: list[str], name: str, budget: int | None,
+          source_domains: list[str] | None = None) -> tuple[str, dict[str, object]]:
     if not modules or len(set(modules)) != len(modules):
         raise ValueError("select at least one module, without duplicates")
     if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", name):
@@ -255,6 +337,7 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
     # Freeze each input once so fingerprints describe the bytes actually assembled.
     raw_sources = {m: files[m].read_bytes() for m in modules}
     source_texts = {m: raw.decode("utf-8").replace("\r\n", "\n") for m, raw in raw_sources.items()}
+    selection = select_source_domains(source_texts, source_domains) if source_domains is not None else None
     included = set(modules)
     required_sections: dict[str, set[str]] = {m: set() for m in modules}
     for source in modules:
@@ -302,6 +385,24 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
         *contents,
         "",
     ]
+    if selection is not None:
+        header.extend([
+            "### Focused source register",
+            "",
+            "- Requested source domains: " + ", ".join(selection["requested_domains"]),
+            "- Included source domains: " + ", ".join(selection["included_domains"]),
+            "- Domains added for explicit section dependencies: " + (", ".join(selection["dependency_domains"]) or "none"),
+            "- Source domains omitted: " + (", ".join(selection["omitted_domains"]) or "none"),
+            f"- Source rows included: {selection['included_source_rows']} of {selection['total_source_rows']}",
+            "",
+            "Only these domain tables are loaded. All source-selection rules, fallback chains,",
+            "taxonomy, workflow packs, maintenance controls, and limitations remain intact.",
+            "Those retained methods can name sources outside this selection. Load any additional",
+            "domain the task requires before relying on its entries; selection does not establish",
+            "complete task coverage or current source verification. Source hashes identify the",
+            "complete original files; the output hash and domain selection identify this extract.",
+            "",
+        ])
     parts.append("\n".join(header))
 
     for number in modules:
@@ -327,6 +428,8 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
         "links_rewired": total_rewired,
         "links_flagged": total_flagged,
     }
+    if selection is not None:
+        stats["source_selection"] = selection
     if budget is not None and stats["tokens"] > budget:
         stats["over_budget"] = stats["tokens"] - budget
     return text, stats
@@ -406,7 +509,9 @@ def main() -> int:
     group.add_argument("--bundle", choices=sorted(BUNDLES), help="named bundle to build")
     group.add_argument("--modules", help="comma-separated module numbers, e.g. 00,03,07")
     group.add_argument("--list", action="store_true", help="list bundles and their sizes")
+    group.add_argument("--list-source-domains", action="store_true", help="list module 02 domain selectors and table sizes")
     group.add_argument("--selftest", action="store_true", help="verify every bundle builds correctly")
+    parser.add_argument("--source-domains", help="include only selected module 02 tables, e.g. 01,16; retains all register governance")
     parser.add_argument("--name", help="override the output name")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="output directory")
     parser.add_argument("--budget", type=int, help="warn if the bundle exceeds this token estimate")
@@ -421,6 +526,14 @@ def main() -> int:
     if args.manifest and args.stdout:
         parser.error("--manifest requires file output")
 
+    if args.source_domains is not None and not (args.bundle or args.modules):
+        parser.error("--source-domains requires --bundle or --modules")
+    if args.list_source_domains:
+        try:
+            list_source_domains()
+        except (ValueError, OSError) as exc:
+            parser.error(str(exc))
+        return 0
     if args.selftest:
         return selftest()
 
@@ -442,7 +555,8 @@ def main() -> int:
     ordered = [m for m in sorted(modules) if not (m in seen or seen.add(m))]
 
     try:
-        text, stats = build(ordered, name, args.budget)
+        selected_domains = [code.strip() for code in args.source_domains.split(",")] if args.source_domains is not None else None
+        text, stats = build(ordered, name, args.budget, selected_domains)
     except (ValueError, OSError) as exc:
         parser.error(str(exc))
     if args.strict_budget and "over_budget" in stats:
