@@ -415,6 +415,21 @@ reconciliation_variance = output control total - expected control total
 
 Do not compute `1 - defect_rate` as a general pass rate when some records were not evaluated. Report `not_evaluated_rate` separately.
 
+### Empty and invalid numeric populations
+
+An empty feed is `NOT_ASSESSED` unless an independently reconciled contract explicitly
+expects zero records. Do not manufacture a 100% pass rate or divide by a substituted
+one. Treat `NaN`, positive or negative infinity, booleans masquerading as numbers,
+and out-of-domain values as invalid inputs with an exception disposition. Zero is a
+value; missing is a state. A zero baseline with positive activity requires a declared
+new-activity rule, not an infinite ratio that contaminates the composite score.
+
+Reconcile defect rates using receipt-level identity as well as business keys. Duplicate
+business identifiers must not collapse multiple defective rows into one counted defect.
+For weighted scores, validate nonnegative finite weights and positive total weight,
+then apply hard gates before aggregation. Record rejected input counts separately from
+assessed and passing counts.
+
 ## 11. Rule taxonomy and rule specification
 
 ### Rule types

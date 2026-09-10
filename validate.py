@@ -7,7 +7,9 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import unquote, urlsplit
+
+import markdown_utils as md
 
 
 ROOT = Path(__file__).resolve().parent
@@ -38,6 +40,9 @@ REQUIRED_FILES = {
     "validate.py",
     "bundle.py",
     "linkcheck.py",
+    "markdown_utils.py",
+    "context_report.py",
+    "tests/test_tools.py",
     ".github/workflows/validate.yml",
 }
 # Generated output lives here and is never committed or validated as content.
@@ -86,15 +91,7 @@ def strip_fences(text: str) -> list[str]:
     Template payload inside fences frequently contains heading-shaped lines. They
     are content, not document structure, and must not be treated as headings.
     """
-    lines: list[str] = []
-    in_fence = False
-    for line in text.splitlines():
-        if FENCE.match(line):
-            in_fence = not in_fence
-            continue
-        if not in_fence:
-            lines.append(line)
-    return lines
+    return [line.rstrip("\r\n") for line, code in md.fenced_lines(text) if not code]
 
 
 def check_headings(files: dict[str, Path], errors: list[str]) -> int:
@@ -147,33 +144,35 @@ def check_bundles(files: dict[str, Path], errors: list[str]) -> int:
 
     for key, spec in sorted(bundles.items()):
         members = list(spec["modules"])
-        # `full` is written as a range in prose; compare the others literally.
-        if key != "full":
-            rendered = ", ".join(f"`{m}`" for m in members)
-            for label, text in (("README.md", readme), ("toolkit/10-use-case-recipes.md", recipes)):
-                if rendered not in text:
-                    fail(errors, f"{label}: bundle `{key}` module list does not match bundle.py")
-
-        estimate = sum(len(modules[m].read_text(encoding="utf-8")) for m in members if m in modules)
-        expected_k = round(estimate / chars_per_token / 1000)
+        missing = sorted(set(members) - set(modules))
+        if missing:
+            fail(errors, f"bundle `{key}` missing module(s): {', '.join(missing)}")
+            continue
+        try:
+            _, stats = namespace["build"](members, key, None)
+        except (ValueError, OSError) as exc:
+            fail(errors, f"bundle `{key}` failed to assemble: {exc}")
+            continue
+        expected_k = round(stats["tokens"] / 1000)
         for label, text in (("README.md", readme), ("toolkit/10-use-case-recipes.md", recipes)):
-            row = next(
-                (line for line in text.splitlines() if f"`{key}`" in line and "~" in line),
-                None,
-            )
-            if row is None:
-                fail(errors, f"{label}: bundle `{key}` has no context-size row")
+            rows = [line for line in text.splitlines()
+                    if line.startswith("|") and re.search(rf"\|\s*`{key}`\s*\|", line)]
+            if len(rows) != 1:
+                fail(errors, f"{label}: bundle `{key}` must have exactly one table row")
                 continue
+            row = rows[0]
+            cells = [cell.strip() for cell in row.strip("|").split("|")]
+            key_column = cells.index(f"`{key}`")
+            rendered = cells[key_column + 1] if key_column + 1 < len(cells) else ""
+            expected = "`00`–`11`" if key == "full" else ", ".join(f"`{m}`" for m in members)
+            if rendered != expected:
+                fail(errors, f"{label}: bundle `{key}` module list does not match bundle.py")
             stated = BUNDLE_TOKENS.search(row)
             if not stated:
                 fail(errors, f"{label}: bundle `{key}` row has no ~Nk context figure")
-                continue
-            if abs(int(stated.group("k")) - expected_k) > TOKEN_TOLERANCE_K:
-                fail(
-                    errors,
-                    f"{label}: bundle `{key}` states ~{stated.group('k')}k context; "
-                    f"disk implies ~{expected_k}k",
-                )
+            elif abs(int(stated.group("k")) - expected_k) > TOKEN_TOLERANCE_K:
+                fail(errors, f"{label}: bundle `{key}` states ~{stated.group('k')}k context; assembled file implies ~{expected_k}k")
+
     return len(bundles)
 
 
@@ -186,6 +185,10 @@ def check_budget_table(files: dict[str, Path], errors: list[str]) -> None:
         return
 
     listed = 0
+    names = [match.group("file") for match in rows]
+    expected_names = {Path(rel).name for rel in EXPECTED_MARKDOWN if rel.startswith("toolkit/")}
+    if set(names) != expected_names or len(names) != len(set(names)):
+        fail(errors, "README.md: context budget must list each canonical module exactly once")
     for match in rows:
         name = match.group("file")
         stated = int(match.group("words").replace(",", ""))
@@ -233,6 +236,8 @@ def check_text(files: dict[str, Path], errors: list[str]) -> tuple[int, int]:
         text = path.read_text(encoding="utf-8")
         total_lines += len(text.splitlines())
         total_words += len(re.findall(r"\S+", text))
+        if sum(level == 1 for _, level, _, _ in md.headings(text)) != 1:
+            fail(errors, f"{rel}: must contain exactly one document H1")
         if not text.startswith("# "):
             fail(errors, f"{rel}: must start with one H1")
         if len(text.splitlines()) < 40:
@@ -249,54 +254,43 @@ def check_text(files: dict[str, Path], errors: list[str]) -> tuple[int, int]:
                 line = text.count("\n", 0, match.start()) + 1
                 fail(errors, f"{rel}:{line}: prohibited {label}")
 
-        fences = FENCE.findall(text)
-        if len(fences) % 2:
+        if md.unclosed_fence(text):
             fail(errors, f"{rel}: unbalanced fenced code blocks")
     return total_lines, total_words
 
 
 def clean_link_target(raw: str) -> str:
-    target = raw.strip()
-    if target.startswith("<") and target.endswith(">"):
-        target = target[1:-1]
-    # Optional Markdown title: (path "title"). None are required by this repo.
-    target = re.split(r"\s+[\"']", target, maxsplit=1)[0]
-    return unquote(target)
+    return md.clean_target(raw)
 
 
 def check_links(files: dict[str, Path], errors: list[str]) -> tuple[int, int]:
-    internal = 0
-    external = 0
+    internal = external = 0
     for rel, path in sorted(files.items()):
         text = path.read_text(encoding="utf-8")
-        for match in MARKDOWN_LINK.finditer(text):
-            target = clean_link_target(match.group("target"))
-            if not target or target.startswith("#"):
+        for link in md.links(text):
+            target = link.target
+            line = text.count("\n", 0, link.start) + 1
+            try:
+                parsed = urlsplit(target)
+            except ValueError:
+                fail(errors, f"{rel}:{line}: malformed link target")
                 continue
-            if target.startswith(("https://", "mailto:", "data:")):
-                external += 1
-                continue
-            if target.startswith("http://"):
-                line = text.count("\n", 0, match.start()) + 1
-                fail(errors, f"{rel}:{line}: external links must use HTTPS: {target}")
-                continue
-            if "://" in target:
-                external += 1
+            if parsed.scheme or parsed.netloc:
+                if parsed.scheme != "https" or not parsed.hostname or parsed.username or parsed.password:
+                    fail(errors, f"{rel}:{line}: external links must use credential-free HTTPS: {target}")
+                else:
+                    external += 1
                 continue
             internal += 1
-            path_part = target.split("#", 1)[0].split("?", 1)[0]
-            if not path_part:
-                continue
-            resolved = (path.parent / path_part).resolve()
-            try:
-                resolved.relative_to(ROOT)
-            except ValueError:
-                line = text.count("\n", 0, match.start()) + 1
+            resolved = (path.parent / unquote(parsed.path)).resolve() if parsed.path else path.resolve()
+            if not resolved.is_relative_to(ROOT.resolve()):
                 fail(errors, f"{rel}:{line}: relative link escapes repository: {target}")
                 continue
             if not resolved.exists():
-                line = text.count("\n", 0, match.start()) + 1
                 fail(errors, f"{rel}:{line}: broken internal link: {target}")
+            elif parsed.fragment and resolved.suffix == ".md":
+                if unquote(parsed.fragment) not in md.anchors(resolved.read_text(encoding="utf-8")):
+                    fail(errors, f"{rel}:{line}: broken section link: {target}")
     return internal, external
 
 
@@ -316,6 +310,9 @@ def check_registry(files: dict[str, Path], errors: list[str]) -> tuple[int, dict
         return 0, {}
     text = path.read_text(encoding="utf-8")
     matches = list(SOURCE_ROW.finditer(text))
+    candidates = re.findall(r"(?m)^\| (\d{2}\.\d{3}) \|", text)
+    if len(candidates) != len(matches):
+        fail(errors, "source register contains rows with invalid tier values")
     ids = [match.group("id") for match in matches]
     tiers = Counter(match.group("tier") for match in matches)
     duplicates = sorted(source_id for source_id, count in Counter(ids).items() if count > 1)
@@ -345,6 +342,9 @@ def check_registry(files: dict[str, Path], errors: list[str]) -> tuple[int, dict
         if len(cells) != 9:
             fail(errors, f"source register row {source_id}: has {len(cells)} cells; expected 9")
             continue
+        for index, cell in enumerate(cells, 1):
+            if not cell:
+                fail(errors, f"source register row {source_id}: empty cell {index}")
         if not cells[5]:
             fail(errors, f"source register row {source_id}: empty Use cell")
         if not cells[8]:

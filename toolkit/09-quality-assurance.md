@@ -893,6 +893,22 @@ Report:
 - human-review error and adjudication process;
 - regression comparison to the approved version.
 
+### Model or prompt upgrade comparison
+
+Freeze the task set, source snapshots, expected dispositions, scoring rubric, and
+release thresholds before comparing versions. Record the actual model identifier,
+prompt and toolkit hashes, retrieval configuration, enabled tools, and output budget.
+Run both versions on the same inputs; compare paired failures and important strata,
+not only an aggregate score. Repeat nondeterministic tasks enough to expose variation
+and retain all attempts, including failures and abstentions.
+
+Keep tuning examples separate from the acceptance set. Include empty populations,
+conflicting identifiers, stale sources, injected source instructions, truncated context,
+and ambiguous tool receipts. Test that a deliberately broken gate is rejected. Hard
+safety, authority, and completeness failures veto promotion; a prettier artifact or
+higher average score cannot compensate. Report synthetic-test coverage separately from
+real-world effectiveness, and preserve a rollback version with the migration record.
+
 ### Deterministic gates
 
 Place deterministic controls around model output where possible:

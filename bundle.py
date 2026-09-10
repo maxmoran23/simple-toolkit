@@ -18,9 +18,16 @@ Output is deterministic: identical inputs produce a byte-identical file.
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
+import os
+import tempfile
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlsplit, unquote
+
+import markdown_utils as md
 
 ROOT = Path(__file__).resolve().parent
 TOOLKIT = ROOT / "toolkit"
@@ -93,12 +100,17 @@ def module_files() -> dict[str, Path]:
     for path in sorted(TOOLKIT.glob("*.md")):
         match = re.match(r"(\d{2})-", path.name)
         if match:
-            found[match.group(1)] = path
+            number = match.group(1)
+            if number in found:
+                raise ValueError(f"duplicate module number: {number}")
+            if path.is_symlink():
+                raise ValueError(f"module must not be a symlink: {path.name}")
+            found[number] = path
     return found
 
 
-def module_title(path: Path) -> str:
-    for line in path.read_text(encoding="utf-8").splitlines():
+def module_title(path: Path, text: str | None = None) -> str:
+    for line in (text if text is not None else path.read_text(encoding="utf-8")).splitlines():
         if line.startswith("# "):
             return line[2:].strip()
     return path.stem
@@ -121,7 +133,8 @@ def resolve_target(target: str) -> tuple[str | None, str]:
     when the link is external or unrecognized.
     """
     path_part, _, fragment = target.partition("#")
-    path_part = path_part.strip()
+    path_part = unquote(path_part.strip())
+    fragment = unquote(fragment)
     if not path_part:
         return None, fragment
     if "://" in path_part or path_part.startswith("mailto:"):
@@ -135,75 +148,124 @@ def resolve_target(target: str) -> tuple[str | None, str]:
     return None, fragment
 
 
-def rewrite_links(
-    text: str, included: set[str], files: dict[str, Path]
-) -> tuple[str, int, int]:
-    """Point in-bundle links at in-file anchors; flag out-of-bundle links.
+def section_map(number: str, text: str) -> dict[str, str]:
+    return {anchor: anchor_for(number) if level == 1 else f"module-{number}-{anchor}"
+            for _, level, _, anchor in md.headings(text)}
 
-    Out-of-bundle links keep a working absolute target so the reader can still
-    reach the source, but carry a `(not loaded)` marker so neither a person nor
-    an assistant treats the referenced rule as available context.
 
-    Returns the rewritten text plus counts of internal rewrites and of
-    references marked as not loaded.
-    """
-    rewired = 0
-    flagged = 0
-
-    def replace(match: re.Match[str]) -> str:
-        nonlocal rewired, flagged
-        target = match.group("target").strip()
-        label = match.group("text")
-        kind, _ = resolve_target(target)
+def rewrite_links(text: str, included: set[str], files: dict[str, Path],
+                  current: str | None = None,
+                  source_texts: dict[str, str] | None = None) -> tuple[str, int, int]:
+    """Preserve section destinations and leave fenced/inline examples unchanged."""
+    rewired = flagged = 0
+    parts, cursor = [], 0
+    for link in md.links(text):
+        target = link.target
+        kind, fragment = resolve_target(target)
+        if target.startswith("#") and current:
+            kind = current
         if kind is None:
-            return match.group(0)
-
+            continue
+        if kind in files and not target.startswith("#"):
+            name = unquote(target.split("#", 1)[0]).split("/")[-1]
+            if name != files[kind].name:
+                raise ValueError(f"unknown linked module filename: {name}")
+        label = ("!" if link.image else "") + f"[{link.label}]"
         if kind in included:
+            anchor = anchor_for(kind)
+            if fragment:
+                mapping = section_map(kind, source_texts[kind] if source_texts is not None else files[kind].read_text(encoding="utf-8"))
+                if fragment not in mapping:
+                    raise ValueError(f"module {current or '?'}: missing section {kind}#{fragment}")
+                anchor = mapping[fragment]
+            replacement = f"{label}(#{anchor})"
             rewired += 1
-            return f"[{label}](#{anchor_for(kind)})"
+        else:
+            if kind in ROOT_DOCS or kind in PLAIN_FILES:
+                location = kind
+            else:
+                path = files.get(kind)
+                if path is None:
+                    raise ValueError(f"unknown linked module: {kind}")
+                location = f"toolkit/{path.name}"
+            suffix = f"#{fragment}" if fragment else ""
+            replacement = f"{label}({REPO_URL}/blob/main/{location}{suffix}) (not loaded)"
+            flagged += 1
+        parts.extend((text[cursor:link.start], replacement))
+        cursor = link.end
+    parts.append(text[cursor:])
+    return "".join(parts), rewired, flagged
 
-        flagged += 1
-        if kind in ROOT_DOCS or kind in PLAIN_FILES:
-            return f"[{label}]({REPO_URL}/blob/main/{kind}) (not loaded)"
-        path = files.get(kind)
-        location = f"toolkit/{path.name}" if path else "toolkit/"
-        return f"[{label}]({REPO_URL}/blob/main/{location}) (not loaded)"
 
-    return LINK.sub(replace, text), rewired, flagged
-
-
-def demote_headings(text: str) -> str:
-    """Drop the module H1 and push every remaining heading down one level.
-
-    The bundle supplies its own H1, so module headings shift to keep a single
-    document outline. Text inside fenced blocks is left untouched.
-    """
-    out: list[str] = []
-    in_fence = False
+def demote_headings(text: str, number: str | None = None,
+                    required: set[str] | None = None,
+                    source_text: str | None = None) -> str:
+    """Demote document headings and assign stable, module-scoped section IDs."""
+    # Link rewriting can change visible heading text; identity belongs to the source.
+    original = text if source_text is None else source_text
+    heading_rows = {index: (level, label, anchor) for index, level, label, anchor in md.headings(original)}
+    out = []
     seen_h1 = False
-    for line in text.splitlines():
-        if re.match(r"^\s*(`{3,}|~{3,})", line):
-            in_fence = not in_fence
-            out.append(line)
-            continue
-        if not in_fence and line.startswith("# ") and not seen_h1:
-            seen_h1 = True
-            continue
-        if not in_fence and re.match(r"^#{1,5} ", line):
-            out.append("#" + line)
-            continue
+    for index, line in enumerate(text.splitlines()):
+        heading = heading_rows.get(index)
+        if heading:
+            level, label, anchor = heading
+            rendered = md.HEADING.match(line.rstrip())
+            if rendered:
+                label = rendered[2]
+            if level == 1 and not seen_h1:
+                seen_h1 = True
+                continue
+            if number and (required is None or anchor in required):
+                out.append(f'<a id="module-{number}-{anchor}"></a>')
+                out.append("")
+            line = "#" * min(level + 1, 6) + " " + label
         out.append(line)
     return "\n".join(out)
 
 
+def estimate_tokens(text: str) -> int:
+    return (len(text) + CHARS_PER_TOKEN - 1) // CHARS_PER_TOKEN
+
+
+def atomic_write(destination: Path, content: str) -> None:
+    """Replace only after the complete UTF-8 payload is written successfully."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".simple-toolkit-", dir=destination.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as stream:
+            stream.write(content)
+        os.replace(temporary, destination)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
 def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[str, int]]:
+    if not modules or len(set(modules)) != len(modules):
+        raise ValueError("select at least one module, without duplicates")
+    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}", name):
+        raise ValueError("name must be 1-64 letters, digits, hyphens or underscores")
+    if budget is not None and budget <= 0:
+        raise ValueError("budget must be positive")
     files = module_files()
     missing = [m for m in modules if m not in files]
     if missing:
-        raise SystemExit(f"error: unknown module(s): {', '.join(missing)}")
+        raise ValueError(f"unknown module(s): {', '.join(missing)}")
 
+    # Freeze each input once so fingerprints describe the bytes actually assembled.
+    raw_sources = {m: files[m].read_bytes() for m in modules}
+    source_texts = {m: raw.decode("utf-8").replace("\r\n", "\n") for m, raw in raw_sources.items()}
     included = set(modules)
+    required_sections: dict[str, set[str]] = {m: set() for m in modules}
+    for source in modules:
+        for link in md.links(source_texts[source]):
+            kind, fragment = resolve_target(link.target)
+            if link.target.startswith("#"):
+                kind = source
+            if kind in included and fragment:
+                required_sections[kind].add(fragment)
     release = release_string()
+    source_rows = [f"- `toolkit/{files[m].name}`: `{hashlib.sha256(raw_sources[m]).hexdigest()}`" for m in modules]
 
     parts: list[str] = []
     total_rewired = 0
@@ -212,7 +274,7 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
     contents: list[str] = []
     for number in modules:
         path = files[number]
-        title = module_title(path)
+        title = module_title(path, source_texts[number])
         contents.append(f"| `{number}` | {title} | [jump](#{anchor_for(number)}) |")
 
     header = [
@@ -230,6 +292,11 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
         "what it says. If a task depends on an absent module, load that module before",
         "relying on the rule.",
         "",
+        "- Required governance modules absent: " + (", ".join(f"`{m}`" for m in ("00", "09") if m not in included) or "none"),
+        "",
+        "Source SHA-256 fingerprints (identify input bytes; do not certify content quality):",
+        *source_rows,
+        "",
         "| Module | Title | Location |",
         "|---|---|---|",
         *contents,
@@ -239,15 +306,15 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
 
     for number in modules:
         path = files[number]
-        title = module_title(path)
-        raw = path.read_text(encoding="utf-8")
-        body, rewired, flagged = rewrite_links(raw, included, files)
+        title = module_title(path, source_texts[number])
+        raw = source_texts[number]
+        body, rewired, flagged = rewrite_links(raw, included, files, number, source_texts)
         total_rewired += rewired
         total_flagged += flagged
         parts.append(
             f'<a id="{anchor_for(number)}"></a>\n\n'
             f"## Module {number} — {title}\n\n"
-            f"{demote_headings(body).strip()}\n"
+            f"{demote_headings(body, number, required_sections[number], raw).strip()}\n"
         )
 
     text = "\n".join(parts).rstrip() + "\n"
@@ -256,7 +323,7 @@ def build(modules: list[str], name: str, budget: int | None) -> tuple[str, dict[
         "chars": len(text),
         "words": len(text.split()),
         "lines": len(text.splitlines()),
-        "tokens": len(text) // CHARS_PER_TOKEN,
+        "tokens": estimate_tokens(text),
         "links_rewired": total_rewired,
         "links_flagged": total_flagged,
     }
@@ -271,9 +338,9 @@ def list_bundles() -> None:
     print("-" * 100)
     for key, spec in BUNDLES.items():
         mods = list(spec["modules"])  # type: ignore[arg-type]
-        chars = sum(len(files[m].read_text(encoding="utf-8")) for m in mods if m in files)
+        _, stats = build(mods, key, None)
         print(
-            f"{key:<15} {','.join(mods):<32} {chars // CHARS_PER_TOKEN:>9,}  {spec['fits']}"
+            f"{key:<15} {','.join(mods):<32} {stats['tokens']:>9,}  {spec['fits']}"
         )
     print(
         "\nToken figures are coarse estimates at "
@@ -301,17 +368,14 @@ def selftest() -> int:
         if again != text:
             failures.append(f"{key}: output is not deterministic")
 
-        for match in dangling.finditer(text):
+        for match in dangling.finditer(md.visible_text(text)):
             failures.append(f"{key}: unresolved file link {match.group(0)}")
 
-        in_fence = False
-        h1 = 0
-        for line in text.splitlines():
-            if re.match(r"^\s*(`{3,}|~{3,})", line):
-                in_fence = not in_fence
-                continue
-            if not in_fence and line.startswith("# "):
-                h1 += 1
+        h1 = sum(level == 1 for _, level, _, _ in md.headings(text))
+        ids = md.anchors(text)
+        for link in md.links(text):
+            if link.target.startswith("#") and link.target[1:] not in ids:
+                failures.append(f"{key}: unresolved fragment {link.target}")
         if h1 != 1:
             failures.append(f"{key}: expected exactly 1 document H1, found {h1}")
 
@@ -346,8 +410,16 @@ def main() -> int:
     parser.add_argument("--name", help="override the output name")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="output directory")
     parser.add_argument("--budget", type=int, help="warn if the bundle exceeds this token estimate")
+    parser.add_argument("--strict-budget", action="store_true", help="exit 1 without output if over --budget")
+    parser.add_argument("--manifest", action="store_true", help="write a deterministic JSON provenance sidecar")
     parser.add_argument("--stdout", action="store_true", help="write to stdout instead of a file")
     args = parser.parse_args()
+    if args.budget is not None and args.budget <= 0:
+        parser.error("--budget must be positive")
+    if args.strict_budget and args.budget is None:
+        parser.error("--strict-budget requires --budget")
+    if args.manifest and args.stdout:
+        parser.error("--manifest requires file output")
 
     if args.selftest:
         return selftest()
@@ -360,37 +432,60 @@ def main() -> int:
         modules = list(BUNDLES[args.bundle]["modules"])  # type: ignore[arg-type]
         name = args.name or args.bundle
     else:
-        modules = [m.strip().zfill(2) for m in args.modules.split(",") if m.strip()]
+        tokens = args.modules.split(",")
+        if any(not re.fullmatch(r"\d{1,2}", m.strip()) for m in tokens):
+            parser.error("--modules requires comma-separated one- or two-digit module numbers")
+        modules = [m.strip().zfill(2) for m in tokens]
         name = args.name or "custom"
 
     seen: set[str] = set()
     ordered = [m for m in sorted(modules) if not (m in seen or seen.add(m))]
 
-    text, stats = build(ordered, name, args.budget)
+    try:
+        text, stats = build(ordered, name, args.budget)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
+    if args.strict_budget and "over_budget" in stats:
+        print(f"error: ~{stats['tokens']:,} estimated tokens exceeds budget {args.budget:,}; no output written", file=sys.stderr)
+        return 1
+    report = sys.stderr if args.stdout else sys.stdout
 
     if args.stdout:
         sys.stdout.write(text)
     else:
-        args.out.mkdir(parents=True, exist_ok=True)
         destination = args.out / f"simple-toolkit-{name}.md"
-        destination.write_text(text, encoding="utf-8")
-        print(f"wrote {destination.relative_to(ROOT)}")
+        atomic_write(destination, text)
+        print(f"wrote {destination}")
+        if args.manifest:
+            files = module_files()
+            payload = {"schema_version": 1, "release": re.search(r"Source release: `([^`]+)`", text)[1], "name": name,
+                       "modules": ordered, "statistics": stats,
+                       "output_sha256": hashlib.sha256(text.encode("utf-8")).hexdigest(),
+                       "token_estimate_method": f"ceil(characters/{CHARS_PER_TOKEN}); not a tokenizer",
+                       "sources": [{"path": path, "sha256": digest} for path, digest in re.findall(r"^- `(toolkit/[^`]+)`: `([0-9a-f]{64})`$", text, re.MULTILINE)]}
+            atomic_write(destination.with_suffix(".json"), json.dumps(payload, sort_keys=True, indent=2) + "\n")
 
     print(
         f"- modules: {stats['modules']} ({', '.join(ordered)})\n"
         f"- lines / words / characters: {stats['lines']:,} / {stats['words']:,} / {stats['chars']:,}\n"
         f"- estimated tokens: ~{stats['tokens']:,} (at {CHARS_PER_TOKEN} chars/token)\n"
         f"- cross-module links rewired to in-file anchors: {stats['links_rewired']:,}\n"
-        f"- references marked as not included: {stats['links_flagged']:,}"
+        f"- references marked as not included: {stats['links_flagged']:,}", file=report
     )
     if "over_budget" in stats:
         print(
             f"WARNING: bundle exceeds the stated budget by ~{stats['over_budget']:,} tokens.\n"
             "         Drop a module or split the work. Content was NOT truncated:\n"
-            "         a silently shortened bundle would misrepresent its own coverage."
+            "         a silently shortened bundle would misrepresent its own coverage.", file=report
         )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except BrokenPipeError:
+        # A downstream reader (for example head) may finish before the bundle.
+        with open(os.devnull, "w") as sink:
+            os.dup2(sink.fileno(), sys.stdout.fileno())
+        sys.exit(0)

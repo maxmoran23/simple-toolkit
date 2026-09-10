@@ -221,6 +221,20 @@ Run the stages in order. A later stage may not erase an earlier-stage failure.
 - If a page or chunk fails, retry only the read operation under the source's documented behavior; otherwise mark the missing interval or token as a gap.
 - Record provider-reported totals where available, but do not substitute them for received-record counts.
 
+### Mutable-source completion check
+
+A pagination cursor is not necessarily a snapshot. Record whether the provider offers
+snapshot isolation, an export cutoff, or only a changing view. Detect repeated cursors,
+repeated pages, and no-progress loops; preserve the gap instead of treating the loop as
+exhaustion. Reconcile unique source IDs against raw receipts so retries do not inflate
+coverage. Fetch thread replies and attachments as separate required populations when
+in scope; a visible parent message does not prove either was retrieved.
+
+Commit an incremental watermark only after the corresponding batch and its receipt
+ledger are durable. On restart, replay the overlap window using stable IDs and version
+tokens. A record absent from one page is not evidence of deletion; require a source
+change event or reconciled snapshot before marking it removed.
+
 ### Stage 3 — preserve source receipts
 
 For each received object, write or record:

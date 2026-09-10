@@ -109,6 +109,19 @@ Confidence applies to a claim, not to a document as a whole.
 
 Do not compute confidence from source count alone. Ten copied stories are one information lineage. State the reason after the label.
 
+### Claim dependency and correction propagation
+
+For a material claim, preserve the source lineage and list downstream findings,
+calculations, and decisions that depend on it. Corroborating sources are independent
+only when their underlying observation is independent; mirrored filings, translated
+copies, and syndicated reports remain one lineage. Capture disagreement at the exact
+claim level instead of averaging source reputations.
+
+If a source is corrected, withdrawn, or shown to identify a different subject, mark the
+claim superseded or unresolved and reassess its dependents. Keep the historical record
+and the prior as-of conclusion. Do not silently rewrite an issued artifact; produce a
+versioned correction and apply the existing release and distribution gates.
+
 ## 6. Research lifecycle and decision gates
 
 The required sequence is:

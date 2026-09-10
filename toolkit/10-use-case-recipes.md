@@ -42,15 +42,15 @@ Every substantial task -> include 00.
 
 | Bundle | Key | Modules | Approx. context | Fits |
 |---|---|---|---|---|
-| Core analysis | `core` | `00`, `07`, `09` | ~45k | provided materials, no external research or structured population |
-| Reporting and dashboards | `reporting` | `00`, `06`, `07`, `09` | ~60k | memo, workbook, deck, dashboard, or maintained tracker |
-| Data and controls | `controls` | `00`, `05`, `06`, `07`, `09` | ~71k | controls, testing, CDEs, lineage, issues, model/data review |
-| Maintained operation | `operation` | `00`, `06`, `08`, `09`, `11` | ~74k | recurring tracker or monitored workflow; add the domain modules the task needs |
-| Mailbox intelligence | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~75k | inbox, shared mailbox, chat, ticket, or intake corpus |
-| Research and OSINT | `research` | `00`, `01`, `02`, `07`, `09` | ~97k | public-source research, regulatory scans, background intelligence |
-| Entity and financial-crime | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~121k | entity, sanctions/PEP, adverse information, typology, case review |
-| Investigation and case review | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~136k | case work that also depends on structured transaction or record data |
-| Full system | `full` | `00`–`11` | ~186k | project knowledge base or complex cross-domain operation |
+| Core analysis | `core` | `00`, `07`, `09` | ~46k | provided materials, no external research or structured population |
+| Reporting and dashboards | `reporting` | `00`, `06`, `07`, `09` | ~62k | memo, workbook, deck, dashboard, or maintained tracker |
+| Data and controls | `controls` | `00`, `05`, `06`, `07`, `09` | ~73k | controls, testing, CDEs, lineage, issues, model/data review |
+| Maintained operation | `operation` | `00`, `06`, `08`, `09`, `11` | ~77k | recurring tracker or monitored workflow; add the domain modules the task needs |
+| Mailbox intelligence | `mailbox` | `00`, `03`, `06`, `07`, `09` | ~76k | inbox, shared mailbox, chat, ticket, or intake corpus |
+| Research and OSINT | `research` | `00`, `01`, `02`, `07`, `09` | ~99k | public-source research, regulatory scans, background intelligence |
+| Entity and financial-crime | `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~123k | entity, sanctions/PEP, adverse information, typology, case review |
+| Investigation and case review | `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~139k | case work that also depends on structured transaction or record data |
+| Full system | `full` | `00`–`11` | ~189k | project knowledge base or complex cross-domain operation |
 
 This is the controlling bundle registry. The [repository README](../README.md) table and
 `bundle.py` restate it; validation fails if any of the three disagree. The key column is
@@ -61,8 +61,9 @@ environment supports it.
 Approximate context figures are coarse estimates at four characters per token, for
 attachment sizing only. Check them before loading: an assistant that truncates attached
 context does not announce it, and a partially loaded bundle can produce confident output
-under rules it never read. If a bundle does not fit, drop a domain module and state the
-reduced coverage in the output.
+under rules it never read. If a bundle does not fit, reduce the task scope and select the smaller complete
+module set, or split the work into separately reconciled stages. State the reduction
+and keep required operating and QA controls in every substantive stage.
 
 Module `09` is not optional merely because the output is internal. Its gate should scale
 to impact and urgency, and it is never the module to drop for size.
@@ -417,6 +418,20 @@ finding, metric, issue, action, source, and limitation to the prior version. Pro
 change log that distinguishes new, changed, resolved, reopened, unchanged, and unavailable
 items. Run the same release tests plus regression checks. Do not overwrite the prior
 approved artifact; issue a new version and mark supersession only after approval.
+```
+
+### 28.4 Evaluate a model or toolkit upgrade
+
+```text
+Compare the current and proposed assistant workflow using modules 00, 06, 09, and 11,
+plus the domain modules needed by the frozen evaluation tasks. Keep the same synthetic
+inputs, expected dispositions, rubric, tools, and output requirements for both versions.
+Declare acceptance thresholds before observing results. Preserve all attempts and
+version references; report paired errors, unsupported claims, abstentions, missing
+coverage, critical failures, runtime, and context cost. Apply the model-change checks
+in module 09. Deliver a comparison table, failure evidence, regression cases, a
+promotion recommendation, and rollback instructions. Do not promote or execute an
+external action merely because the proposed model produced more polished prose.
 ```
 
 ## 29. Project acceptance criteria

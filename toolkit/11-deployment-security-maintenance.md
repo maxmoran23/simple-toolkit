@@ -194,6 +194,16 @@ Rules:
 | Over-automation | A draft or recommendation becomes an official decision. | Authority levels, draft labels, human decision points, prohibited-action list, postcondition review. |
 | Inadequate retention | Evidence is lost too early or sensitive data kept too long. | Retention schedule, legal-hold path, deletion approval, evidence/data separation. |
 
+### Tool-result and attachment trust
+
+Preserve the source boundary through OCR, extraction, retrieval, and agent handoffs.
+An image caption, quoted message, document annotation, hidden HTML field, or connector
+result can contain an instruction; none becomes user authorization through parsing.
+Apply least privilege at the tool boundary even if a model appears to disregard the
+instruction. Test with synthetic attempts to change destinations, reveal private data,
+override a task, or claim an approval. A successful injection test demonstrates the
+specific tested defenses only; it does not certify all future inputs.
+
 ## Data classification and handling
 
 Use the institution's approved classification scheme when one exists. The generic default below is a starting point, not a substitute for policy.
@@ -442,6 +452,19 @@ Each release records:
 Each material output records the toolkit version or source commit used. A file modified outside a release must be identifiable as local and unverified.
 
 ## Current release record
+
+| Field | `v1.3.0` record |
+|---|---|
+| Version and date | `v1.3.0`; 2026-09-10 |
+| Source commits reviewed | Local and public baseline `simple-toolkit` at `abe6c0f`; `analyst-toolkit` baseline at `9a34133`. Current public OFAC FAQ 401 and FinCEN CDD overview checked for the ownership distinctions. |
+| Files changed | All twelve existing modules, repository instructions and README; bundle, link and validation tools; Markdown parser, context reporter, offline regression suite and CI. |
+| Behavior and control changes | Preserves section references and literal code during assembly; reports missing governance modules and actual assembly overhead; adds strict optional size rejection and hash manifests; strengthens malformed URL/input and fragment validation; clarifies source instructions, claim corrections, partial retrieval, finite inputs, exports, delegated review, model-change acceptance, and economic ownership versus sanctions propagation. |
+| Migration required | Regenerate previously assembled files to receive the fixes. Existing named bundle membership is unchanged. Invalid selections, unresolved sections, and malformed inputs now fail; use unique output names and review the provenance sidecar. |
+| Validation commands | `python3 validate.py`; `python3 bundle.py --selftest`; `python3 linkcheck.py --selftest`; `python3 -m unittest discover -s tests -v`. The test suite uses synthetic fixtures and a temporary loopback HTTP server. |
+| Known limitations | Context figures remain estimates, not tokenizer measurements. No live or production model-effectiveness study was performed. Source-register URLs were not comprehensively refreshed; reachability is distinct from legal applicability and source currency. Prompt controls require runtime enforcement and qualified institutional review. |
+| Rollback release | Prior source revision `abe6c0f` (`v1.2.0` documentation version); reassemble from that revision and verify stored output hashes. No external state migration is required. |
+
+## Prior release record — v1.2.0
 
 | Field | `v1.2.0` record |
 |---|---|

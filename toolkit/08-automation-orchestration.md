@@ -687,6 +687,20 @@ Evaluate the produced artifact independently of the job's self-report. A rubric 
 
 Use deterministic checks as the always-on floor. Store rubric ID, version, named checks, weights, results, and score. A failed rubric definition is an evaluation-system failure, not a zero-quality artifact. A present artifact that fails every valid check may legitimately score zero.
 
+### Delegated work acceptance
+
+Give each worker a bounded input population, owned output, dependency version, allowed
+actions, and acceptance test. Delegation does not expand the parent task's permissions.
+Parallelize independent reads and disjoint edits; serialize changes to shared state or
+require a version-checked commit. Merge by stable IDs and reconcile returned, failed,
+missing, and overlapping work units before claiming coverage.
+
+Require source pointers and performed checks with each result. Reinspect material
+claims against preserved inputs; a worker's success message is not a receipt. If a
+worker times out, preserve partial output as provisional and reconcile any ambiguous
+side effects before retrying. Record which reviewer did not author the decisive method
+and which checks are still self-review.
+
 ### Semantic or expert review
 
 Use a qualified reviewer or separately governed evaluation for correctness, insight, legal interpretation, fairness, and material judgment. Do not present another model's opinion as independent validation without disclosing the method and its limitations.

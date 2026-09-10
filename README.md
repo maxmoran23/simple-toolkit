@@ -5,7 +5,7 @@ It consolidates research, OSINT, communications review, financial-crime intellig
 data quality, automation, quality assurance, and professional reporting into a small
 set of large, reusable Markdown modules.
 
-Current release: `v1.2.0` — 2026-08-14.
+Current release: `v1.3.0` — 2026-09-10.
 
 The package is designed for constrained work environments where a user can attach a
 limited number of reference files to an approved assistant. It is not a monitoring
@@ -69,15 +69,15 @@ and several bundles exceed what a constrained assistant will accept.
 
 | Bundle | Modules | Approx. context | Fits |
 |---|---|---|---|
-| `core` | `00`, `07`, `09` | ~45k tokens | Provided materials; no external research or structured population |
-| `reporting` | `00`, `06`, `07`, `09` | ~60k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
-| `controls` | `00`, `05`, `06`, `07`, `09` | ~71k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
-| `operation` | `00`, `06`, `08`, `09`, `11` | ~74k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
-| `mailbox` | `00`, `03`, `06`, `07`, `09` | ~75k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
-| `research` | `00`, `01`, `02`, `07`, `09` | ~97k tokens | Public-source research, regulatory scans, background intelligence |
-| `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~121k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
-| `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~136k tokens | Case work that also depends on structured transaction or record data |
-| `full` | `00`–`11` | ~186k tokens | Project knowledge base or complex cross-domain operation |
+| `core` | `00`, `07`, `09` | ~46k tokens | Provided materials; no external research or structured population |
+| `reporting` | `00`, `06`, `07`, `09` | ~62k tokens | Memo, workbook, deck, dashboard, or maintained tracker |
+| `controls` | `00`, `05`, `06`, `07`, `09` | ~73k tokens | Controls, testing, CDEs, lineage, issues, model/data review |
+| `operation` | `00`, `06`, `08`, `09`, `11` | ~77k tokens | Recurring tracker or monitored workflow; add the domain modules the task needs |
+| `mailbox` | `00`, `03`, `06`, `07`, `09` | ~76k tokens | Inbox, shared mailbox, chat, ticket, or intake corpus |
+| `research` | `00`, `01`, `02`, `07`, `09` | ~99k tokens | Public-source research, regulatory scans, background intelligence |
+| `entity` | `00`, `01`, `02`, `04`, `05`, `07`, `09` | ~123k tokens | Entity, sanctions/PEP, adverse information, typology, case review |
+| `investigation` | `00`, `01`, `02`, `04`, `05`, `06`, `07`, `09` | ~139k tokens | Case work that also depends on structured transaction or record data |
+| `full` | `00`–`11` | ~189k tokens | Project knowledge base or complex cross-domain operation |
 
 This table is the same registry used by [`10-use-case-recipes.md`](toolkit/10-use-case-recipes.md)
 and by `bundle.py`. Validation fails if the three disagree.
@@ -95,19 +95,19 @@ that would have blocked it were never read. Check the size before loading.
 
 | Module | Words | Approx. tokens |
 |---|---:|---:|
-| `00-operating-system.md` | 6,742 | ~11,700 |
-| `01-evidence-research-standard.md` | 7,338 | ~13,200 |
-| `02-osint-source-register.md` | 21,546 | ~38,900 |
-| `03-mailbox-communications.md` | 8,073 | ~14,500 |
-| `04-intelligence-fincrime-frameworks.md` | 6,816 | ~12,800 |
-| `05-investigation-control-methods.md` | 6,101 | ~11,200 |
-| `06-data-quality-governance.md` | 8,110 | ~15,300 |
-| `07-output-templates.md` | 6,896 | ~12,100 |
-| `08-automation-orchestration.md` | 5,470 | ~10,500 |
-| `09-quality-assurance.md` | 11,149 | ~21,000 |
-| `10-use-case-recipes.md` | 4,470 | ~8,500 |
-| `11-deployment-security-maintenance.md` | 8,087 | ~15,700 |
-| **All twelve modules** | **100,798** | **~186,000** |
+| `00-operating-system.md` | 6,870 | ~11,889 |
+| `01-evidence-research-standard.md` | 7,447 | ~13,442 |
+| `02-osint-source-register.md` | 21,647 | ~39,124 |
+| `03-mailbox-communications.md` | 8,203 | ~14,749 |
+| `04-intelligence-fincrime-frameworks.md` | 6,896 | ~12,955 |
+| `05-investigation-control-methods.md` | 6,260 | ~11,528 |
+| `06-data-quality-governance.md` | 8,242 | ~15,524 |
+| `07-output-templates.md` | 7,037 | ~12,372 |
+| `08-automation-orchestration.md` | 5,586 | ~10,716 |
+| `09-quality-assurance.md` | 11,285 | ~21,284 |
+| `10-use-case-recipes.md` | 4,604 | ~8,694 |
+| `11-deployment-security-maintenance.md` | 8,452 | ~16,400 |
+| **All twelve modules** | **102,529** | **~188,677** |
 
 Token figures are coarse estimates at four characters per token, published for
 attachment sizing only. They are not a tokenizer result and must not be cited as
@@ -118,8 +118,8 @@ Practical consequences:
 - `02-osint-source-register.md` is roughly a fifth of the package. Load it only
   when the task actually needs source discovery, and prefer the workflow source
   packs in its section 9 over the full registry.
-- If a bundle does not fit, remove a domain module and state the reduced
-  coverage in the output. Do not silently drop `09`.
+- If a bundle does not fit, narrow the task or divide it into reconciled stages.
+  Keep the operating contract and QA controls with each substantive stage.
 - When the assistant accepts few attachments, build one file instead.
 
 ## Building a single-file bundle
@@ -130,16 +130,29 @@ repository access. `bundle.py` assembles any bundle into one Markdown file:
 ```bash
 python3 bundle.py --list                        # bundles and their sizes
 python3 bundle.py --bundle mailbox              # write build/simple-toolkit-mailbox.md
-python3 bundle.py --modules 00,04,07 --name adhoc
-python3 bundle.py --bundle research --budget 60000
+python3 bundle.py --modules 00,04,07,09 --name adhoc
+python3 bundle.py --bundle research --budget 60000 --strict-budget
+python3 bundle.py --bundle core --manifest       # Markdown plus provenance sidecar
+python3 context_report.py                       # measured words and size estimates
 ```
 
-The assembler rewrites cross-module links to in-file anchors and explicitly
+The assembler preserves section destinations and code examples, rewrites cross-module links to in-file anchors, and explicitly
 marks every reference to a module that was not included, so a bundle cannot
 imply guidance it does not carry. Output is deterministic and written to the
 ignored `build/` directory; it is never committed. The tool is a convenience
 for transport only — the modules remain directly usable without it, and it adds
-no rule that is not already in the toolkit.
+no analytical rule that is not already in the toolkit.
+
+`--budget` warns; `--strict-budget` rejects an oversized bundle before creating output.
+Both use an estimate, so reserve space for task inputs and the answer. `--stdout`
+emits only the Markdown, suitable for piping. `--manifest` writes source and output
+SHA-256 hashes, module selection, and size metadata alongside the attachment. These
+prove file integrity and provenance, not that an assistant read or followed the content.
+Custom selections report missing operating or QA modules explicitly.
+
+Use `python3 context_report.py --json` for machine-readable size data. The module
+budget measures raw files; the bundle tables and `--list` include assembly overhead.
+Section anchors are added only where a link needs them to limit transport cost.
 
 ## Copy-ready task brief
 
@@ -229,6 +242,9 @@ The repository carries a pure-standard-library validation gate:
 
 ```bash
 python3 validate.py
+python3 bundle.py --selftest
+python3 linkcheck.py --selftest
+python3 -m unittest discover -s tests -v
 ```
 
 It enforces the fourteen-file Markdown inventory, internal-link resolution, HTTPS-only
@@ -237,7 +253,8 @@ workflow-pack ID resolution, balanced code fences, canonical confidence terminol
 fence-aware duplicate-heading detection, agreement between the bundle registry in
 `bundle.py` and both published bundle tables, agreement between the published context
 budget and the files on disk, release-record consistency, and public-repository
-hygiene. GitHub Actions runs the same gate on every push and pull request. A separate
+hygiene. GitHub Actions runs the same gate on every push and pull request. The offline regression suite includes real local HTTP responses, redirect controls,
+malformed input, fragment resolution, code preservation, and budget rejection. A separate
 on-demand reporter, `linkcheck.py`, probes register URLs and reports reachability only,
 recording anti-bot denials as an access outcome rather than source retirement; it is
 deliberately kept out of continuous integration. External sites can move or block

@@ -398,12 +398,17 @@ separate relationship. Prevent double counting when paths converge.
 
 - Apply the jurisdiction's identification threshold for beneficial ownership. The widely
   used public reference point is 25 percent of ownership interests (for example the
-  FinCEN customer due diligence rule), with control-based identification as a separate
-  prong that no percentage satisfies.
+  [FinCEN customer due diligence rule](https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule)),
+  with control-based identification as a separate prong that no percentage satisfies.
+  Check current exceptions and relief for the institution, customer, and account event;
+  this reference threshold does not establish that every opening requires fresh collection.
 - For sanctions exposure, apply the blocking rule of the relevant authority. Under the
   published OFAC 50 Percent Rule the interests of sanctioned owners aggregate: two
-  designated parties holding 30 and 25 percent block the entity even though neither
-  alone reaches 50.
+  blocked persons holding 30 and 25 percent in aggregate meet that ownership test
+  even though neither alone reaches 50. Apply blocking through blocked intermediaries
+  as described in [OFAC FAQ 401](https://ofac.treasury.gov/faqs/401): in its 50%-then-50%
+  chain, the downstream entity is blocked despite a 25% multiplied economic interest.
+  The economic path-product formula above is therefore not a sanctions algorithm.
 - Treat a result just under a threshold as a review case, not a clean pass, and define
   the near-threshold band in policy before calculating.
 - Control qualifies on substance: sole or decisive authority, or voting power at or
@@ -414,6 +419,17 @@ separate relationship. Prevent double counting when paths converge.
   percent, and route non-converging or capped results to review.
 - Truncated evidence blocks clearance: when the ownership graph was cut off by data or
   computation limits, the unexamined part cannot support a below-threshold conclusion.
+
+### 8.5 Threshold provenance and precision
+
+Preserve the applicable regime, effective date, ownership class, threshold, aggregation
+rule, control prong, and source of each percentage with the graph version. Compare
+unrounded calculated interests against the threshold; round only for display. If
+reported percentages are rounded or the filing is incomplete, show the uncertainty
+interval and route any interval crossing the threshold for review. Do not substitute
+an ownership-identification threshold for a sanctions blocking test or a control test.
+The examples above illustrate different questions; obtain the current applicable rule
+and qualified interpretation before an institutional decision.
 
 ## 9. Transaction and activity analysis
 

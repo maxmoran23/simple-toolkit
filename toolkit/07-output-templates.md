@@ -1171,6 +1171,21 @@ because the chart displays an aggregate.
 - Include source publication/event date and retrieval/extraction time.
 - Mark broken, superseded, archived, or inaccessible links visibly.
 
+### Verify the exported artifact
+
+Freeze the analytical data version before rendering. For each export, record the
+active filters, included population, row count, units, and control totals; reconcile
+these to the intended screen or full-population view. Make filtered versus full export
+an explicit choice. Hash the completed file for integrity and verify after the final
+save, since a check of an earlier draft does not attest the delivered bytes.
+
+Preserve identifier strings and leading zeroes in spreadsheets. Serialize untrusted
+text as text, including formula-shaped values; never repair it by changing the raw
+evidence. Escape HTML text and attributes, restrict active URL schemes, and keep source
+text out of executable script. Check keyboard-only navigation, visible focus, table
+headers, non-color status labels, chart alternatives, and print overflow. If a format
+cannot be opened or rendered in the available runtime, label that check unverified.
+
 ## 29. Format-specific release gates
 
 | Format | Must pass before release |

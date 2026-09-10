@@ -88,6 +88,17 @@ Access labels describe the public interface at registry review, not a promise of
 | Historical page | Issuer archive/version history -> official gazette/library capture -> lawful independent web archive -> secondary quotation with limitation |
 | Blockchain | Node/ledger data -> recognized explorer for reproduction -> issuer/regulator designation -> independent attribution; community labels last |
 
+### Reachability triage without false freshness
+
+Use a source's maintenance record to distinguish `REACHABLE`, `REDIRECTED`,
+`ACCESS_LIMITED`, `UNREACHABLE`, and `CONTENT_REVIEW_REQUIRED`. These are review
+categories, not a replacement for the link reporter's observed status. An HTTP success
+can be a login page or soft error; a denial can leave an authoritative source fully
+valid for a human reader. Confirm issuer identity and the specific publication before
+changing a register URL or marking a source retired. Preserve the old URL and review
+reason in the private maintenance record. Prioritize sources supporting open decisions,
+then overdue critical sources; a broad sweep cannot certify record currency.
+
 ## 7. Exclusions and archive practice
 
 Exclude AI-generated answers, search snippets, knowledge panels, content farms, unattributed list copies, deceptive look-alike domains, source-less “background check” pages, bulk doxxing files, and mirrors whose origin cannot be authenticated. Do not treat a commercial screening match as the controlling record; trace it to the issuer.

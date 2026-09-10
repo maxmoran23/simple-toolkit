@@ -340,6 +340,16 @@ spam deposits below defined value floors, self-transfers between addresses under
 control, and high-frequency same-counterparty churn each distort volume and counterparty
 counts if left unlabeled.
 
+### Reproducible ledger scope
+
+For a fund-flow calculation, pin chain/network, asset identifier, block range and
+canonical block references, transaction status, base units, decimal conversion,
+and valuation timestamp. Do not join assets by ticker alone. Keep failed execution,
+internal movement, fees, and duplicate logs in declared separate buckets. Record
+whether finality was checked for the chosen network; later reorganizations require
+reconciliation and a versioned correction. Unknown finality, valuation, or attribution
+remains a limitation, not a zero balance or a verified owner.
+
 ### 10.3 Protocol risk domains
 
 Assess at least:
