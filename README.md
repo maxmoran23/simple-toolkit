@@ -11,6 +11,12 @@ The package is designed for constrained work environments where a user can attac
 limited number of reference files to an approved assistant. It is not a monitoring
 service, a screening system, a legal opinion, or an authorization to take action.
 
+## Focused Markdown attachment suites
+
+For one clearly scoped review, use the companion [Markdown Analyst Toolkit](https://github.com/maxmoran23/markdown-analyst-toolkit). Its 16 topic suites each contain ten working attachments plus a README and build record. Each suite supplies a detailed method, fictional worked example, fixed report and workbook templates, and a complete offline dashboard with light and dark themes.
+
+Download one suite, attach its numbered files, and provide permitted inputs. The workflow needs no terminal, connector or agent builder; actual file creation is checked in the current session. Start with [the suite catalog](https://github.com/maxmoran23/markdown-analyst-toolkit#choose-the-decision-you-need-to-support) or [the plain-English guide](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/main/docs/START-HERE.md).
+
 ## Why this repository exists
 
 Large prompt libraries become difficult to operate when a single project requires
