@@ -13,7 +13,7 @@ service, a screening system, a legal opinion, or an authorization to take action
 
 ## Focused Markdown attachment suites
 
-For one clearly scoped review, use the companion [Markdown Analyst Toolkit](https://github.com/maxmoran23/markdown-analyst-toolkit). Its 16 topic suites each contain ten working attachments plus a README and build record. Each suite supplies a detailed method, fictional worked example, fixed report and workbook templates, and a complete offline dashboard with light and dark themes.
+For one clearly scoped review, use the companion [Markdown Analyst Toolkit](https://github.com/maxmoran23/markdown-analyst-toolkit). Its 24 topic suites each contain ten working attachments plus a README and build record. Each suite supplies a detailed method, fictional worked example, fixed report and workbook templates, and a complete offline dashboard with light and dark themes. The [offline suite finder](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/suite-finder.html) helps select a topic and copy the attachment prompt for the current stage.
 
 Download one suite, attach its numbered files, and provide permitted inputs. The workflow needs no terminal, connector or agent builder; actual file creation is checked in the current session. Start with [the suite catalog](https://github.com/maxmoran23/markdown-analyst-toolkit#choose-the-decision-you-need-to-support) or [the plain-English guide](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/main/docs/START-HERE.md).
 
